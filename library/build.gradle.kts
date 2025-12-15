@@ -48,8 +48,21 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.coroutines.test)
+            implementation(project(":test"))
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.junit.api)
+            implementation(libs.junit.engine)
+            implementation(libs.junit.params)
+            implementation(libs.mockk.mockk)
         }
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 mavenPublishing {

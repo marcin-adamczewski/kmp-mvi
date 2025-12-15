@@ -13,7 +13,7 @@ version = "1.0.0-alpha1"
 kotlin {
     jvm()
     androidLibrary {
-        namespace = "org.jetbrains.kotlinx.multiplatform.library.template"
+        namespace = "com.adamczewski.kmpmvi"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -37,6 +37,10 @@ kotlin {
     linuxX64()
 
     sourceSets {
+        all {
+            languageSettings.optIn("kotlin.concurrent.atomics.ExperimentalAtomicApi")
+        }
+
         commonMain.dependencies {
             implementation(libs.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel)

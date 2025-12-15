@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalAtomicApi::class)
-
 package com.adamczewski.kmpmvi.mvi.utils
 
 import kotlin.concurrent.atomics.AtomicReference
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.update
 
 /**

@@ -8,3 +8,6 @@ class UiError(
 )
 
 interface UiErrorAction
+
+const val LONG_ERROR_DURATION = 5_000L
+const val SHORT_ERROR_DURATION = 3_000L

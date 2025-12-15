@@ -1,6 +1,6 @@
 [versions]
 android-compileSdk = "36"
-android-minSdk = "24"
+android-minSdk = "21"
 androidx-viewmodel = "2.10.0"
 agp = "8.13.0"
 coroutines = "1.10.2"
@@ -11,8 +11,10 @@ vanniktechMavenPublish = "0.34.0"
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-viewmodel" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+turbine = "app.cash.turbine:turbine:1.2.1"
 
 [plugins]
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }
+android-lint = { id = "com.android.lint", version.ref = "agp" }

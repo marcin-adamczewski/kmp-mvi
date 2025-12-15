@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalUuidApi::class, ExperimentalAtomicApi::class)
+@file:OptIn(ExperimentalUuidApi::class)
 
 package com.adamczewski.kmpmvi.mvi.effects
 
@@ -7,7 +7,6 @@ import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

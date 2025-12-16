@@ -9,6 +9,7 @@ import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviEffect
 import com.adamczewski.kmpmvi.mvi.ProgressObservable
+import com.adamczewski.kmpmvi.mvi.Settings
 import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.defaultSettings
@@ -19,7 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 
 abstract class BaseMviViewModel<Action : MviAction, State : MVIState, Effect : MviEffect>(
     initialState: State,
-    settings: MviComponent.Settings? = null,
+    settings: Settings? = null,
     vararg closeables: Closeable = arrayOf(),
 ) : ViewModel(), StateComponent<Action, State, Effect> {
 

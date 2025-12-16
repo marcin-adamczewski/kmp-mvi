@@ -5,6 +5,7 @@ import com.adamczewski.kmpmvi.mvi.MVIState
 import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.Settings
 import com.adamczewski.kmpmvi.mvi.logger.Logger
 import com.adamczewski.kmpmvi.test.testEffects
 import com.adamczewski.kmpmvi.test.testState
@@ -48,7 +49,7 @@ class MviComponentTest {
         return MviComponent<TestAction, TestState, TestEffect>(
             scopeProvider = { CoroutineScope(SupervisorJob() + Dispatchers.Main) },
             initialState = initialState,
-            settings = MviComponent.Settings(
+            settings = Settings(
                 logger = { NoOpLogger() },
                 effectsBufferSize = effectsBufferSize,
                 exceptionHandler = exceptionHandler,

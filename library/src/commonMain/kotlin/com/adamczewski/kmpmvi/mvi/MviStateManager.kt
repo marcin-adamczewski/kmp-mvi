@@ -5,21 +5,21 @@ import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
 abstract class MviStateManager<Action : MviAction, State : MVIState, Effect : MviEffect>(
     initialState: State,
-    settings: MviComponent.Settings? = null,
+    settings: Settings? = null,
     vararg closeables: Closeable = arrayOf(),
 ) : Closeable, StateComponent<Action, State, Effect> {
     private val closeables = mutableListOf(*closeables)
 
-    protected val component = MviComponent<Action, State, Effect>(
-        { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) },
-        initialState,
-        settings ?: defaultSettings()
-    )
+    protected val component = with(settings ?: defaultSettings()) {
+        MviComponent<Action, State, Effect>(
+            initialState = initialState,
+            scopeProvider = scopeProvider,
+            settings = this
+        )
+    }
 
     protected val scope = component.scope
 

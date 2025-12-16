@@ -3,7 +3,6 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
-import com.adamczewski.kmpmvi.mvi.logger.Logger
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -130,10 +129,4 @@ class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
             }
         }
     }
-
-    class Settings(
-        val logger: () -> Logger = { object : Logger {} },
-        val effectsBufferSize: Int = 10,
-        val exceptionHandler: CoroutineExceptionHandler? = null,
-    )
 }

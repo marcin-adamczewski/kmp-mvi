@@ -2,48 +2,20 @@ package com.adamczewski.kmpmvi.mvi.android
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.adamczewski.kmpmvi.mvi.error.ErrorManager
-import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.Closeable
 import com.adamczewski.kmpmvi.mvi.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.MVIState
-import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
-import com.adamczewski.kmpmvi.mvi.MviStateManager
+import com.adamczewski.kmpmvi.mvi.MviEffect
 import com.adamczewski.kmpmvi.mvi.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.StateComponent
-import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.defaultSettings
-import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
+import com.adamczewski.kmpmvi.mvi.error.ErrorManager
+import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
-
-open class BaseViewModel<Action : MviAction, State : MVIState, Effect : MviEffect>(
-    private val container: MviStateManager<Action, State, Effect>,
-) : ViewModel(AutoCloseable { container.close() }),
-    StateComponent<Action, State, Effect> by container
-
-abstract class MviViewModel<Action : MviAction, State : MVIState, Effect : MviEffect> :
-    ViewModel(), StateComponent<Action, State, Effect> {
-
-    abstract val container: MviStateManager<Action, State, Effect>
-
-    init {
-        addCloseable(AutoCloseable { container.close() })
-    }
-
-    override val currentState: StateFlow<State>
-        get() = container.currentState
-
-    override val effects: EffectsHandler<Effect>
-        get() = container.effects
-
-    override fun submitAction(action: Action) {
-        container.submitAction(action)
-    }
-}
 
 abstract class BaseMviViewModel<Action : MviAction, State : MVIState, Effect : MviEffect>(
     initialState: State,
@@ -67,7 +39,7 @@ abstract class BaseMviViewModel<Action : MviAction, State : MVIState, Effect : M
 
     /**
      * Override this method to handle actions.
-     * It's recommended to call only methods from provided [ActionsManager] in this method.
+     * It's recommended to call only methods from provided [com.adamczewski.kmpmvi.mvi.actions.ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
     protected abstract fun ActionsManager<Action>.handleActions()

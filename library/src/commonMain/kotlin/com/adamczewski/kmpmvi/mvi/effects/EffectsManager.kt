@@ -37,7 +37,7 @@ class EffectsManager<T : MviEffect>(bufferSize: Int) {
     }
 }
 
-data class UniqueEffect<T : MviEffect>(
+class UniqueEffect<T : MviEffect>(
     val effect: T,
     val id: String = Uuid.random().toString(),
 )

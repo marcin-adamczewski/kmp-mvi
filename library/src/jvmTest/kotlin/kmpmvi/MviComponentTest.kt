@@ -20,11 +20,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -462,6 +465,98 @@ class MviComponentTest {
             }
     }
 
+    @Nested
+    inner class Lifecycle {
+
+        @Test
+        fun `when first state subscriber, then call onInit`() = runTest {
+            val sut = createSut()
+            var called = false
+            val job = launch {
+                sut.onInit {
+                    called = true
+                }
+            }
+
+            assertFalse(called)
+            sut.currentState.launchIn(backgroundScope)
+
+            job.join()
+            assertTrue(called)
+        }
+
+        @Test
+        fun `verify state has initially one subscriber`() = runTest {
+            createSut().subscribersCount.test {
+                assertEquals(1, awaitItem())
+            }
+        }
+
+        @Test
+        fun `when subscribed, then call onSubscribe, when unsubscribe, then call onUnsubscribe`() = runTest {
+            val sut = createSut()
+            var subscribeCount = 0
+            var unsubscribeCount = 0
+
+            launch {
+                sut.onSubscribe {
+                    subscribeCount++
+                }
+
+                sut.onUnsubscribe {
+                    unsubscribeCount++
+                }
+            }
+            advanceUntilIdle()
+
+            assertEquals(0, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val job1 = launch {
+                sut.currentState.collect {  }
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val job2 = launch {
+                sut.currentState.collect {  }
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            job1.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            job2.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            val job3 = launch {
+                sut.currentState.collect {  }
+            }
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            job3.cancel()
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(2, unsubscribeCount)
+        }
+
+    }
+
     @Test
     fun `when clear called, then scope cancelled`() = runTest {
         val sut = createSut()
@@ -486,23 +581,35 @@ class MviComponentTest {
     private class NoOpLogger : Logger {
 
         override fun onAction(action: MviAction) {
-            super.onAction(action)
             println("Action: $action")
         }
 
+        override fun onInit() {
+            println("onInit")
+        }
+
+        override fun onSubscribe() {
+            println("onSubscribe")
+        }
+
+        override fun onUnsubscribe() {
+            println("onUnsubscribe")
+        }
+
         override fun onEffect(effect: MviEffect) {
-            super.onEffect(effect)
-            println("Effect: $effect")
+            println("onEffect: $effect")
         }
 
         override fun onInitialState(state: MVIState) {
-            super.onInitialState(state)
-            println("Initial State: $state")
+            println("onInitialState $state")
         }
 
         override fun onState(state: MVIState) {
-            super.onState(state)
-            println("State: $state")
+            println("onState: $state")
+        }
+
+        override fun onClear() {
+            println("onClear")
         }
     }
 }

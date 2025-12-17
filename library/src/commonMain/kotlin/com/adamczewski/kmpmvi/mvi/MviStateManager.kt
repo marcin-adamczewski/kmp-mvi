@@ -5,6 +5,8 @@ import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.take
 
 abstract class MviStateManager<Action : MviAction, State : MVIState, Effect : MviEffect>(
     initialState: State,
@@ -25,6 +27,18 @@ abstract class MviStateManager<Action : MviAction, State : MVIState, Effect : Mv
 
     init {
         component.actions.handleActions()
+    }
+
+    fun onInit(block: suspend () -> Unit) {
+        component.onInit(block)
+    }
+
+    fun onSubscribe(block: suspend () -> Unit) {
+        component.onSubscribe(block)
+    }
+
+    fun onUnsubscribe(block: suspend () -> Unit) {
+        component.onUnsubscribe(block)
     }
 
     /**

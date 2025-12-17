@@ -3,15 +3,24 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
-import kotlin.coroutines.EmptyCoroutineContext
+import com.adamczewski.kmpmvi.mvi.logger.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.coroutines.EmptyCoroutineContext
 
 interface MviAction
 object NoActions : MviAction
@@ -32,10 +41,10 @@ class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
     @PublishedApi internal val settings: Settings,
 ) : StateComponent<Action, State, Effects> {
 
-    private val logger by lazy { settings.logger() }
+    private val logger: Logger by lazy { settings.logger() }
 
     @PublishedApi
-    internal val scope = CoroutineScope(
+    internal val scope: CoroutineScope = CoroutineScope(
         scopeProvider().coroutineContext.let { context ->
             val exceptionHandler =
                 context[CoroutineExceptionHandler.Key] ?: settings.exceptionHandler
@@ -48,6 +57,12 @@ class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
 
     private val effectsManager = EffectsManager<Effects>(settings.effectsBufferSize)
 
+    private val isStateSubscribed: StateFlow<Boolean?> = stateFlow.subscriptionCount
+        .drop(2) // We're not interested in initial 0 value and the first logger subscriber
+        .map { it >= MIN_SUBSCRIBERS_COUNT }
+        .distinctUntilChanged()
+        .stateIn(scope, SharingStarted.Eagerly, null)
+
     internal val actions = ActionsManager<Action>(scope)
 
     val progress = ProgressCounter()
@@ -56,10 +71,44 @@ class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
 
     override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
 
+    val subscribersCount: StateFlow<Int> = stateFlow.subscriptionCount
+
     init {
         scope.launch {
             initLogger(initialState)
         }
+    }
+
+    fun onInit(block: suspend () -> Unit) {
+        isStateSubscribed
+            .filter { it == true }
+            .take(1)
+            .onEach {
+                logger.onInit()
+                block()
+            }
+            .launchIn(scope)
+    }
+
+
+    fun onSubscribe(block: suspend () -> Unit) {
+        isStateSubscribed
+            .filter { it == true }
+            .onEach {
+                logger.onSubscribe()
+                block()
+            }
+            .launchIn(scope)
+    }
+
+    fun onUnsubscribe(block: suspend () -> Unit) {
+        isStateSubscribed
+            .filter { it == false }
+            .onEach {
+                logger.onUnsubscribe()
+                block()
+            }
+            .launchIn(scope)
     }
 
     fun setState(reducer: State.() -> State) {
@@ -101,8 +150,8 @@ class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
     }
 
     fun clear() {
+        logger.onClear()
         scope.cancel()
-        logger.onCleared()
     }
 
     private fun initLogger(initialState: State) {
@@ -128,5 +177,10 @@ class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
                 logger.onAction(it)
             }
         }
+    }
+
+    private companion object {
+        // One subscriber is for a logger
+        private const val MIN_SUBSCRIBERS_COUNT = 2
     }
 }

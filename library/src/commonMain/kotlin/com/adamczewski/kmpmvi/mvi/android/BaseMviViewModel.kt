@@ -38,6 +38,18 @@ abstract class BaseMviViewModel<Action : MviAction, State : MVIState, Effect : M
         component.actions.handleActions()
     }
 
+    fun onInit(block: suspend () -> Unit) {
+        component.onInit(block)
+    }
+
+    fun onSubscribe(block: suspend () -> Unit) {
+        component.onSubscribe(block)
+    }
+
+    fun onUnsubscribe(block: suspend () -> Unit) {
+        component.onUnsubscribe(block)
+    }
+
     /**
      * Override this method to handle actions.
      * It's recommended to call only methods from provided [com.adamczewski.kmpmvi.mvi.actions.ActionsManager] in this method.

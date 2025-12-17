@@ -9,5 +9,8 @@ interface Logger {
     fun onState(state: MVIState) {}
     fun onEffect(effect: MviEffect) {}
     fun onAction(action: MviAction) {}
-    fun onCleared() {}
+    fun onInit() {}
+    fun onSubscribe() {}
+    fun onUnsubscribe() {}
+    fun onClear() {}
 }

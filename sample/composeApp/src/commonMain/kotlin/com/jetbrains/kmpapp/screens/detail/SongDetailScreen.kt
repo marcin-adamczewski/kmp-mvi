@@ -1,10 +1,8 @@
 package com.jetbrains.kmpapp.screens.detail
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -22,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -31,7 +30,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jetbrains.kmpapp.data.Song
-import com.jetbrains.kmpapp.screens.EmptyScreenContent
 import kmp_mvi.sample.composeapp.generated.resources.Res
 import kmp_mvi.sample.composeapp.generated.resources.back
 import kmp_mvi.sample.composeapp.generated.resources.label_artist
@@ -41,24 +39,24 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun DetailScreen(
+fun SongDetailsScreen(
     songId: String,
     navigateBack: () -> Unit,
 ) {
-    val viewModel = koinViewModel<DetailViewModel>()
+    val viewModel = koinViewModel<SongDetailViewModel>()
+    val state: SongDetailState by viewModel.currentState.collectAsStateWithLifecycle()
 
-    val obj by viewModel.getSong(songId).collectAsStateWithLifecycle(initialValue = null)
-    AnimatedContent(obj != null) { objectAvailable ->
-        if (objectAvailable) {
-            ObjectDetails(obj!!, onBackClick = navigateBack)
-        } else {
-            EmptyScreenContent(Modifier.fillMaxSize())
-        }
+    LaunchedEffect(Unit) {
+        viewModel.submitAction(SongDetailsAction.Init(songId))
+    }
+
+    state.song?.let { song ->
+        SongDetailsScreen(song, onBackClick = navigateBack)
     }
 }
 
 @Composable
-private fun ObjectDetails(
+private fun SongDetailsScreen(
     song: Song,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,

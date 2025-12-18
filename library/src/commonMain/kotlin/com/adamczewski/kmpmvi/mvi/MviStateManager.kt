@@ -5,10 +5,8 @@ import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.take
 
-abstract class MviStateManager<Action : MviAction, State : MVIState, Effect : MviEffect>(
+abstract class MviStateManager<Action : MviAction, State : MviState, Effect : MviEffect>(
     initialState: State,
     settings: Settings? = null,
     vararg closeables: Closeable = arrayOf(),

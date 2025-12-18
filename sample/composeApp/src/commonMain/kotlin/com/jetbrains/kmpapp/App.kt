@@ -11,32 +11,43 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.jetbrains.kmpapp.screens.detail.DetailScreen
-import com.jetbrains.kmpapp.screens.list.ListScreen
+import com.adamczewski.kmpmvi.mvi.MviGlobalSettings
+import com.jetbrains.kmpapp.logger.MviLogger
+import com.jetbrains.kmpapp.screens.detail.SongDetailsScreen
+import com.jetbrains.kmpapp.screens.list.SongsScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
-object ListDestination
+object SongsDestination
 
 @Serializable
-data class DetailDestination(val songId: String)
+data class SongDetailsDestination(val songId: String)
 
 @Composable
 fun App() {
+    MviGlobalSettings.apply {
+        loggerProvider = { tag, _ ->
+            MviLogger(tag)
+        }
+    }
+
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
     ) {
         Surface {
             val navController: NavHostController = rememberNavController()
-            NavHost(navController = navController, startDestination = ListDestination) {
-                composable<ListDestination> {
-                    ListScreen(navigateToDetails = { songId ->
-                        navController.navigate(DetailDestination(songId))
+            NavHost(
+                navController = navController,
+                startDestination = SongsDestination
+            ) {
+                composable<SongsDestination> {
+                    SongsScreen(navigateToDetails = { songId ->
+                        navController.navigate(SongDetailsDestination(songId))
                     })
                 }
-                composable<DetailDestination> { backStackEntry ->
-                    DetailScreen(
-                        songId = backStackEntry.toRoute<DetailDestination>().songId,
+                composable<SongDetailsDestination> { backStackEntry ->
+                    SongDetailsScreen(
+                        songId = backStackEntry.toRoute<SongDetailsDestination>().songId,
                         navigateBack = {
                             navController.popBackStack()
                         }

@@ -36,6 +36,7 @@ kotlin {
         iosMain.dependencies {
         }
         commonMain.dependencies {
+            implementation(project(":library"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -68,6 +69,7 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+
     }
     buildTypes {
         getByName("release") {

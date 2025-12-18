@@ -1,7 +1,7 @@
 package kmpmvi
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.MVIState
+import com.adamczewski.kmpmvi.mvi.MviState
 import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviEffect
@@ -576,7 +576,7 @@ class MviComponentTest {
         data class QueryChanged(val query: String) : TestAction
     }
 
-    private data class TestState(val value: String = "") : MVIState
+    private data class TestState(val value: String = "") : MviState
 
     private class NoOpLogger : Logger {
 
@@ -600,11 +600,11 @@ class MviComponentTest {
             println("onEffect: $effect")
         }
 
-        override fun onInitialState(state: MVIState) {
+        override fun onInitialState(state: MviState) {
             println("onInitialState $state")
         }
 
-        override fun onState(state: MVIState) {
+        override fun onState(state: MviState) {
             println("onState: $state")
         }
 

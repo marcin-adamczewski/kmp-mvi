@@ -25,17 +25,17 @@ import kotlin.coroutines.EmptyCoroutineContext
 interface MviAction
 object NoActions : MviAction
 
-interface MVIState {
+interface MviState {
     override fun equals(other: Any?): Boolean
     override fun hashCode(): Int
 }
 
-data object NoState : MVIState
+data object NoState : MviState
 
 interface MviEffect
 object NoEffects : MviEffect
 
-class MviComponent<Action : MviAction, State: MVIState, Effects : MviEffect>(
+class MviComponent<Action : MviAction, State: MviState, Effects : MviEffect>(
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: Settings,

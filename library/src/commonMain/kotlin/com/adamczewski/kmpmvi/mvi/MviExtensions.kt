@@ -1,7 +1,7 @@
 package com.adamczewski.kmpmvi.mvi
 
 
-internal fun StateComponent<out MviAction, out MVIState, out MviEffect>.defaultSettings(): Settings {
+internal fun StateComponent<out MviAction, out MviState, out MviEffect>.defaultSettings(): Settings {
     return Settings(
         logger = {
             MviGlobalSettings.loggerProvider(

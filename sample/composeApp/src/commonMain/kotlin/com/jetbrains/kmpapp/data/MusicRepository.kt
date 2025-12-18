@@ -1,12 +1,57 @@
 package com.jetbrains.kmpapp.data
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onSubscription
+import kotlin.random.Random
 
 class MusicRepository() {
-    fun getSongs(): Flow<List<Song>> = flowOf(sampleSongs)
+    private val refresh = MutableSharedFlow<Unit>()
+    private val random = Random(100)
 
-    fun getSong(id: String): Song? = sampleSongs.find { it.id == id }
+    fun getSongs(query: String? = null): Flow<Result<List<Song>>> = refresh
+        .onSubscription { emit(Unit) }
+        .flatMapLatest {
+            val randomInt = random.nextInt(6)
+            delay(800)
+            val songs = if (query != null) {
+                sampleSongs.shuffled().filter {
+                    it.title.contains(query, ignoreCase = true) ||
+                            it.artistDisplayName.contains(query, ignoreCase = true)
+                }
+            } else {
+                when (randomInt) {
+                    0 -> emptyList()
+                    else -> sampleSongs.shuffled()
+                }
+            }
+
+            if (randomInt == 1) {
+                flowOf(Result.failure(IllegalStateException("Simulated error")))
+            } else {
+                flowOf(Result.success(songs))
+            }
+
+        }
+        .catch { error ->
+            if (error is CancellationException) {
+                throw error
+            } else {
+                emit(Result.failure(error))
+            }
+        }
+
+    fun getSong(id: String): Result<Song?> =
+        runCatching { sampleSongs.find { it.id == id } }
+
+    suspend fun refresh() {
+        refresh.emit(Unit)
+    }
 }
 
 private val sampleSongs = listOf(
@@ -114,5 +159,10 @@ private val sampleSongs = listOf(
         artistDisplayName = "The Weeknd",
         releaseDate = "2025-12-18"
     ),
-    Song(id = "20", title = "Solar Power", artistDisplayName = "Lorde", releaseDate = "2025-12-18")
+    Song(id = "20", title = "Solar Power", artistDisplayName = "Lorde", releaseDate = "2025-12-18"),
+    Song(id = "21", title = "Solar Power", artistDisplayName = "Lorde", releaseDate = "2025-12-18"),
+    Song(id = "22", title = "Solar Power", artistDisplayName = "Lorde", releaseDate = "2025-12-18"),
+    Song(id = "23", title = "Solar Power", artistDisplayName = "Lorde", releaseDate = "2025-12-18"),
+    Song(id = "24", title = "Solar Power", artistDisplayName = "Lorde", releaseDate = "2025-12-18")
+
 )

@@ -11,3 +11,15 @@ interface UiErrorAction
 
 const val LONG_ERROR_DURATION = 5_000L
 const val SHORT_ERROR_DURATION = 3_000L
+
+fun Throwable.toUiError(
+    durationMs: Long = LONG_ERROR_DURATION,
+    action: UiErrorAction? = null,
+    isIndefinite: Boolean = false,
+) =
+    UiError(
+        durationMs = durationMs,
+        error = this,
+        action = action,
+        isIndefinite = isIndefinite
+    )

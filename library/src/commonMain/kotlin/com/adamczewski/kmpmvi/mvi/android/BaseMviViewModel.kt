@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adamczewski.kmpmvi.mvi.Closeable
 import com.adamczewski.kmpmvi.mvi.CombinedProgressPublisher
-import com.adamczewski.kmpmvi.mvi.MVIState
+import com.adamczewski.kmpmvi.mvi.MviState
 import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviEffect
@@ -18,7 +18,7 @@ import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
 
-abstract class BaseMviViewModel<Action : MviAction, State : MVIState, Effect : MviEffect>(
+abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect>(
     initialState: State,
     settings: Settings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -81,16 +81,15 @@ abstract class BaseMviViewModel<Action : MviAction, State : MVIState, Effect : M
     }
 
     protected suspend fun setEffect(
-        requireConsumer: Boolean = false,
         reducer: suspend State.() -> Effect,
     ) {
-        component.setEffect(requireConsumer, reducer)
+        component.setEffect(requireConsumer = false, reducer)
     }
 
     protected suspend fun setEffectIfActive(
         reducer: suspend State.() -> Effect,
     ) {
-        setEffect(requireConsumer = true, reducer)
+        component.setEffect(requireConsumer = true, reducer)
     }
 
     protected fun observeProgress(

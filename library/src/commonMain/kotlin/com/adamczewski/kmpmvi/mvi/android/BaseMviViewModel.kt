@@ -2,23 +2,32 @@ package com.adamczewski.kmpmvi.mvi.android
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.adamczewski.kmpmvi.mvi.BaseMviComponent
+import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
 import com.adamczewski.kmpmvi.mvi.Closeable
 import com.adamczewski.kmpmvi.mvi.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.MviState
 import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.MviMessage
+import com.adamczewski.kmpmvi.mvi.NoMessages
+import com.adamczewski.kmpmvi.mvi.ProgressCounter
 import com.adamczewski.kmpmvi.mvi.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.Settings
 import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.defaultSettings
+import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
-abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect>(
+typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, NoMessages>
+
+abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,
     settings: Settings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -26,13 +35,31 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
 
     private val closeables = mutableListOf(*closeables)
 
-    protected val component = MviComponent<Action, State, Effect>(
+    protected val component = BaseMviComponent<Action, State, Effect, Message>(
         { viewModelScope },
         initialState,
         settings ?: defaultSettings()
     )
 
     protected val scope = component.scope
+
+    /**
+     * Override this method to handle actions.
+     * It's recommended to call only methods from provided [ActionsManager] in this method.
+     * Other methods should be called within actions handling functions.
+     */
+    protected abstract fun ActionsManager<Action>.handleActions()
+
+    override val currentState: StateFlow<State> = component.currentState
+
+    protected val stateValue: State
+        get() = currentState.value
+
+    override val effects: EffectsHandler<Effect> = component.effects
+
+    val progress: ProgressCounter = component.progress
+
+    val messages: Flow<Message> = component.messenger.messages
 
     init {
         component.actions.handleActions()
@@ -50,27 +77,11 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
         component.onUnsubscribe(block)
     }
 
-    /**
-     * Override this method to handle actions.
-     * It's recommended to call only methods from provided [com.adamczewski.kmpmvi.mvi.actions.ActionsManager] in this method.
-     * Other methods should be called within actions handling functions.
-     */
-    protected abstract fun ActionsManager<Action>.handleActions()
-
     override fun onCleared() {
         component.clear()
         closeables.forEach { it.close() }
         super.onCleared()
     }
-
-    override val currentState = component.currentState
-
-    protected val stateValue: State
-        get() = currentState.value
-
-    override val effects = component.effects
-
-    val progress = component.progress
 
     final override fun submitAction(action: Action) {
         component.submitAction(action)
@@ -90,6 +101,24 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
         reducer: suspend State.() -> Effect,
     ) {
         component.setEffect(requireConsumer = true, reducer)
+    }
+
+    protected suspend fun setMessage(reducer: suspend State.() -> Message) {
+        component.messenger.setMessage(reducer(stateValue))
+    }
+
+    protected inline fun <reified M : MviMessage> onMessageFlow(
+        child: BaseMviStateManager<*, *, *, in M>,
+        noinline flowMapper: suspend Flow<M>.() -> Flow<*>,
+    ) {
+        component.messenger.onMessageFlow(M::class, child, flowMapper)
+    }
+
+    protected inline fun <reified M : MviMessage> onMessage(
+        child: BaseMviStateManager<*, *, *, in M>,
+        noinline block: suspend (M) -> Unit,
+    ) {
+        component.messenger.onMessage(M::class, child, block)
     }
 
     protected fun observeProgress(

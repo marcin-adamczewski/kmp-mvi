@@ -4,7 +4,7 @@ import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviEffect
 import com.adamczewski.kmpmvi.mvi.MviState
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import com.adamczewski.kmpmvi.mvi.android.BaseMviViewModel
+import com.adamczewski.kmpmvi.mvi.android.MviViewModel
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.onEach
 class SongsViewModel(
     private val musicRepository: MusicRepository,
     private val errorManager: ErrorManager,
-) : BaseMviViewModel<SongsAction, SongsState, SongsEffect>(
+) : MviViewModel<SongsAction, SongsState, SongsEffect>(
     SongsState()
 ) {
     private val searchQuery = MutableStateFlow<String?>(null)

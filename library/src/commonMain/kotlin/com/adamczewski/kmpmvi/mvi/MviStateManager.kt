@@ -3,10 +3,15 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
+import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
-abstract class MviStateManager<Action : MviAction, State : MviState, Effect : MviEffect>(
+typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, NoMessages>
+
+abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,
     settings: Settings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -14,7 +19,7 @@ abstract class MviStateManager<Action : MviAction, State : MviState, Effect : Mv
     private val closeables = mutableListOf(*closeables)
 
     protected val component = with(settings ?: defaultSettings()) {
-        MviComponent<Action, State, Effect>(
+        BaseMviComponent<Action, State, Effect, Message>(
             initialState = initialState,
             scopeProvider = scopeProvider,
             settings = this
@@ -23,9 +28,28 @@ abstract class MviStateManager<Action : MviAction, State : MviState, Effect : Mv
 
     protected val scope = component.scope
 
+    override val currentState: StateFlow<State> = component.currentState
+
+    protected val stateValue: State
+        get() = currentState.value
+
+    override val effects: EffectsHandler<Effect> = component.effects
+
+    val progress: ProgressCounter = component.progress
+
+    val messages: Flow<Message> = component.messenger.messages
+
     init {
         component.actions.handleActions()
     }
+
+    /**
+     * Override this method to handle actions.
+     * It's recommended to call only methods from provided [ActionsManager] in this method.
+     * Other methods should be called within actions handling functions.
+     */
+    protected abstract fun ActionsManager<Action>.handleActions()
+
 
     fun onInit(block: suspend () -> Unit) {
         component.onInit(block)
@@ -39,26 +63,10 @@ abstract class MviStateManager<Action : MviAction, State : MviState, Effect : Mv
         component.onUnsubscribe(block)
     }
 
-    /**
-     * Override this method to handle actions.
-     * It's recommended to call only methods from provided [ActionsManager] in this method.
-     * Other methods should be called within actions handling functions.
-     */
-    protected abstract fun ActionsManager<Action>.handleActions()
-
     override fun close() {
         closeables.forEach { it.close() }
         component.clear()
     }
-
-    override val currentState = component.currentState
-
-    protected val stateValue: State
-        get() = currentState.value
-
-    override val effects = component.effects
-
-    val progress = component.progress
 
     final override fun submitAction(action: Action) {
         component.submitAction(action)
@@ -79,6 +87,24 @@ abstract class MviStateManager<Action : MviAction, State : MviState, Effect : Mv
         reducer: suspend State.() -> Effect,
     ) {
         setEffect(requireConsumer = true, reducer)
+    }
+
+    protected suspend fun setMessage(reducer: suspend State.() -> Message) {
+        component.messenger.setMessage(reducer(stateValue))
+    }
+
+    protected inline fun <reified M : MviMessage> onMessageFlow(
+        child: BaseMviStateManager<*, *, *, in M>,
+        noinline flowMapper: suspend Flow<M>.() -> Flow<*>,
+    ) {
+        component.messenger.onMessageFlow(M::class, child, flowMapper)
+    }
+
+    protected inline fun <reified M : MviMessage> onMessage(
+        child: BaseMviStateManager<*, *, *, in M>,
+        noinline block: suspend (M) -> Unit,
+    ) {
+        component.messenger.onMessage(M::class, child, block)
     }
 
     protected fun observeProgress(

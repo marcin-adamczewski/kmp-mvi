@@ -1,19 +1,14 @@
 package kmpmvi
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.MviState
 import com.adamczewski.kmpmvi.mvi.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.MviState
 import com.adamczewski.kmpmvi.mvi.Settings
 import com.adamczewski.kmpmvi.mvi.logger.Logger
 import com.adamczewski.kmpmvi.test.testEffects
 import com.adamczewski.kmpmvi.test.testState
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertIs
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +29,11 @@ import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class MviComponentTest {
 
@@ -41,6 +41,8 @@ class MviComponentTest {
     fun cleanUp() {
         Dispatchers.resetMain()
     }
+
+    private val scopeProvider = { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
 
     private fun createSut(
         initialState: TestState = TestState(),
@@ -50,7 +52,7 @@ class MviComponentTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
         return MviComponent<TestAction, TestState, TestEffect>(
-            scopeProvider = { CoroutineScope(SupervisorJob() + Dispatchers.Main) },
+            scopeProvider = scopeProvider,
             initialState = initialState,
             settings = Settings(
                 logger = { NoOpLogger() },

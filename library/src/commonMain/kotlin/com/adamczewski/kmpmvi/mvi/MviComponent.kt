@@ -4,6 +4,7 @@ import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
 import com.adamczewski.kmpmvi.mvi.logger.Logger
+import com.adamczewski.kmpmvi.mvi.messenger.Messenger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -35,7 +36,12 @@ data object NoState : MviState
 interface MviEffect
 object NoEffects : MviEffect
 
-class MviComponent<Action : MviAction, State: MviState, Effects : MviEffect>(
+interface MviMessage
+object NoMessages : MviMessage
+
+typealias MviComponent<A, S, E> = BaseMviComponent<A, S, E, NoMessages>
+
+class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: Settings,
@@ -72,6 +78,8 @@ class MviComponent<Action : MviAction, State: MviState, Effects : MviEffect>(
     override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
 
     val subscribersCount: StateFlow<Int> = stateFlow.subscriptionCount
+
+    val messenger = Messenger<Message>(scope)
 
     init {
         scope.launch {
@@ -175,6 +183,12 @@ class MviComponent<Action : MviAction, State: MviState, Effects : MviEffect>(
         scope.launch {
             actions.actions.collect {
                 logger.onAction(it)
+            }
+        }
+
+        scope.launch {
+            messenger.messages.collect {
+                logger.onMessage(it)
             }
         }
     }

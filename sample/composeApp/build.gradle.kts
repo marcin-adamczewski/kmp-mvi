@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    alias(sampleLibs.plugins.androidApplication)
+    alias(sampleLibs.plugins.composeMultiplatform)
+    alias(sampleLibs.plugins.composeCompiler)
     alias(libs.plugins.kotlinxSerialization)
 }
 
@@ -30,8 +30,8 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-            implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.activity.compose)
+            implementation(sampleLibs.androidx.compose.ui.tooling.preview)
+            implementation(sampleLibs.androidx.activity.compose)
         }
         iosMain.dependencies {
         }
@@ -44,12 +44,12 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
 
-            implementation(libs.navigation.compose)
-            implementation(libs.lifecycle.runtime.compose)
-            implementation(libs.material.icons.core)
+            implementation(sampleLibs.navigation.compose)
+            implementation(sampleLibs.lifecycle.runtime.compose)
+            implementation(sampleLibs.material.icons.core)
 
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose.viewmodel)
+            implementation(sampleLibs.koin.core)
+            implementation(sampleLibs.koin.compose.viewmodel)
         }
     }
 }

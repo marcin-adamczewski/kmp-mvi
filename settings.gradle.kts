@@ -11,6 +11,12 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
     }
+
+    versionCatalogs {
+        create("sampleLibs") {
+            from(files("sample/sampleLibs.versions.toml"))
+        }
+    }
 }
 
 rootProject.name = "kmp-mvi"

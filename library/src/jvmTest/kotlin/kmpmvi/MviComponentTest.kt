@@ -1,10 +1,10 @@
 package kmpmvi
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
-import com.adamczewski.kmpmvi.mvi.MviEffect
-import com.adamczewski.kmpmvi.mvi.MviState
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.Settings
 import com.adamczewski.kmpmvi.mvi.logger.Logger
 import com.adamczewski.kmpmvi.test.testEffects

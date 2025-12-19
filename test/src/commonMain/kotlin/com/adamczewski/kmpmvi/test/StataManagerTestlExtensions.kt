@@ -2,8 +2,8 @@ package com.adamczewski.kmpmvi.test
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.StateComponent
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle

@@ -1,7 +1,7 @@
 package kmpmvi
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.UniqueEffect
 import io.mockk.coVerify

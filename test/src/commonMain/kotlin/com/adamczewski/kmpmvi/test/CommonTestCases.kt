@@ -1,7 +1,7 @@
 package com.adamczewski.kmpmvi.test
 
-import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.error.LONG_ERROR_DURATION
 import com.adamczewski.kmpmvi.mvi.error.UiError

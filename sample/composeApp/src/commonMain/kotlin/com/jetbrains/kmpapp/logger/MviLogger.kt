@@ -1,8 +1,8 @@
 package com.jetbrains.kmpapp.logger
 
-import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviEffect
-import com.adamczewski.kmpmvi.mvi.MviState
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.logger.Logger
 
 class MviLogger(tag: String) : Logger {

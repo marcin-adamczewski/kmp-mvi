@@ -1,6 +1,6 @@
 package com.adamczewski.kmpmvi.mvi.actions
 
-import com.adamczewski.kmpmvi.mvi.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.utils.MarkedFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

@@ -1,12 +1,12 @@
 package kmpmvi
 
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
-import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviMessage
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.MviStateManager
-import com.adamczewski.kmpmvi.mvi.NoActions
-import com.adamczewski.kmpmvi.mvi.NoEffects
-import com.adamczewski.kmpmvi.mvi.NoState
+import com.adamczewski.kmpmvi.mvi.model.NoActions
+import com.adamczewski.kmpmvi.mvi.model.NoEffects
+import com.adamczewski.kmpmvi.mvi.model.NoState
 import com.adamczewski.kmpmvi.mvi.Settings
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import kotlinx.coroutines.CoroutineScope

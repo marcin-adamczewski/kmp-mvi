@@ -1,8 +1,8 @@
 package com.jetbrains.kmpapp.screens.detail
 
-import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviState
-import com.adamczewski.kmpmvi.mvi.NoEffects
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviState
+import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.android.MviViewModel
 import com.adamczewski.kmpmvi.mvi.error.UiError

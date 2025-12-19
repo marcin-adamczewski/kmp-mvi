@@ -1,7 +1,7 @@
 package com.adamczewski.kmpmvi.mvi.messenger
 
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
-import com.adamczewski.kmpmvi.mvi.MviMessage
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 

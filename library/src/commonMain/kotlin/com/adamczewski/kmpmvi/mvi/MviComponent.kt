@@ -5,6 +5,11 @@ import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
 import com.adamczewski.kmpmvi.mvi.logger.Logger
 import com.adamczewski.kmpmvi.mvi.messenger.Messenger
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
+import com.adamczewski.kmpmvi.mvi.model.MviState
+import com.adamczewski.kmpmvi.mvi.model.NoMessages
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -22,22 +27,6 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
-
-interface MviAction
-object NoActions : MviAction
-
-interface MviState {
-    override fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
-}
-
-data object NoState : MviState
-
-interface MviEffect
-object NoEffects : MviEffect
-
-interface MviMessage
-object NoMessages : MviMessage
 
 typealias MviComponent<A, S, E> = BaseMviComponent<A, S, E, NoMessages>
 

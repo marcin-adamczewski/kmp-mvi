@@ -2,7 +2,7 @@
 
 package com.adamczewski.kmpmvi.mvi.effects
 
-import com.adamczewski.kmpmvi.mvi.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

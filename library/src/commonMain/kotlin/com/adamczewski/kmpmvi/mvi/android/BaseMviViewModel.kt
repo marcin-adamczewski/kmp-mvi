@@ -6,11 +6,11 @@ import com.adamczewski.kmpmvi.mvi.BaseMviComponent
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
 import com.adamczewski.kmpmvi.mvi.Closeable
 import com.adamczewski.kmpmvi.mvi.CombinedProgressPublisher
-import com.adamczewski.kmpmvi.mvi.MviState
-import com.adamczewski.kmpmvi.mvi.MviAction
-import com.adamczewski.kmpmvi.mvi.MviEffect
-import com.adamczewski.kmpmvi.mvi.MviMessage
-import com.adamczewski.kmpmvi.mvi.NoMessages
+import com.adamczewski.kmpmvi.mvi.model.MviState
+import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
+import com.adamczewski.kmpmvi.mvi.model.NoMessages
 import com.adamczewski.kmpmvi.mvi.ProgressCounter
 import com.adamczewski.kmpmvi.mvi.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.Settings

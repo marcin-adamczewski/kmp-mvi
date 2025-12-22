@@ -10,8 +10,11 @@ import kotlinx.coroutines.flow.filter
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-class EffectsManager<T : MviEffect>(bufferSize: Int) {
-    private val consumedEffectIds = AtomicMutableSet<String>()
+class EffectsManager<T : MviEffect>(
+    bufferSize: Int,
+    idsLruCacheSize: Int = EFFECT_IDS_LRU_CACHE_SIZE
+) {
+    private val consumedEffectIds = AtomicMutableSet<String>(maxSize = idsLruCacheSize)
     private val effectsFlow = MutableSharedFlow<UniqueEffect<T>>(
         replay = bufferSize,
         extraBufferCapacity = bufferSize
@@ -34,6 +37,10 @@ class EffectsManager<T : MviEffect>(bufferSize: Int) {
 
     private fun consumeEffect(effect: UniqueEffect<out MviEffect>) {
         consumedEffectIds.add(effect.id)
+    }
+
+    private companion object {
+        private const val EFFECT_IDS_LRU_CACHE_SIZE = 30
     }
 }
 

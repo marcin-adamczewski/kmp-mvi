@@ -10,6 +10,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.NoMessages
+import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,7 @@ typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, NoMessages>
 
 abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,
-    settings: Settings? = null,
+    settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
 ) : Closeable, StateComponent<Action, State, Effect> {
     private val closeables = mutableListOf(*closeables)

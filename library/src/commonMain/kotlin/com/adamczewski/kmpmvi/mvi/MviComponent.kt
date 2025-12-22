@@ -3,13 +3,15 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
-import com.adamczewski.kmpmvi.mvi.logger.Logger
+import com.adamczewski.kmpmvi.mvi.logger.MviLogger
+import com.adamczewski.kmpmvi.mvi.logger.NoOpLogger
 import com.adamczewski.kmpmvi.mvi.messenger.Messenger
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.NoMessages
+import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -33,10 +35,16 @@ typealias MviComponent<A, S, E> = BaseMviComponent<A, S, E, NoMessages>
 class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
     scopeProvider: () -> CoroutineScope,
     initialState: State,
-    @PublishedApi internal val settings: Settings,
+    @PublishedApi internal val settings: MviSettings,
 ) : StateComponent<Action, State, Effects> {
 
-    private val logger: Logger by lazy { settings.logger() }
+    private val logger: MviLogger by lazy {
+        if (MviConfig.canLog) {
+            settings.logger()
+        } else {
+            NoOpLogger()
+        }
+    }
 
     @PublishedApi
     internal val scope: CoroutineScope = CoroutineScope(

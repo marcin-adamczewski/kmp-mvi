@@ -13,7 +13,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.NoMessages
 import com.adamczewski.kmpmvi.mvi.ProgressCounter
 import com.adamczewski.kmpmvi.mvi.ProgressObservable
-import com.adamczewski.kmpmvi.mvi.Settings
+import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.defaultSettings
@@ -29,16 +29,16 @@ typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, NoMessages>
 
 abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,
-    settings: Settings? = null,
+    settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
 ) : ViewModel(), StateComponent<Action, State, Effect> {
 
     private val closeables = mutableListOf(*closeables)
 
     protected val component = BaseMviComponent<Action, State, Effect, Message>(
-        { viewModelScope },
-        initialState,
-        settings ?: defaultSettings()
+        scopeProvider = { viewModelScope },
+        initialState = initialState,
+        settings = settings ?: defaultSettings()
     )
 
     protected val scope = component.scope

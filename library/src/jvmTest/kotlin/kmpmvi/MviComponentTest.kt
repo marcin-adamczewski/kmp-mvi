@@ -3,10 +3,10 @@ package kmpmvi
 import app.cash.turbine.test
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
+import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviState
-import com.adamczewski.kmpmvi.mvi.Settings
-import com.adamczewski.kmpmvi.mvi.logger.Logger
+import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.test.testEffects
 import com.adamczewski.kmpmvi.test.testState
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -54,10 +54,11 @@ class MviComponentTest {
         return MviComponent<TestAction, TestState, TestEffect>(
             scopeProvider = scopeProvider,
             initialState = initialState,
-            settings = Settings(
-                logger = { NoOpLogger() },
+            settings = MviSettings(
+                logger = { DefaultMviLogger("ComponentTest") },
                 effectsBufferSize = effectsBufferSize,
                 exceptionHandler = exceptionHandler,
+                scopeProvider = scopeProvider
             )
         )
     }
@@ -580,38 +581,4 @@ class MviComponentTest {
 
     private data class TestState(val value: String = "") : MviState
 
-    private class NoOpLogger : Logger {
-
-        override fun onAction(action: MviAction) {
-            println("Action: $action")
-        }
-
-        override fun onInit() {
-            println("onInit")
-        }
-
-        override fun onSubscribe() {
-            println("onSubscribe")
-        }
-
-        override fun onUnsubscribe() {
-            println("onUnsubscribe")
-        }
-
-        override fun onEffect(effect: MviEffect) {
-            println("onEffect: $effect")
-        }
-
-        override fun onInitialState(state: MviState) {
-            println("onInitialState $state")
-        }
-
-        override fun onState(state: MviState) {
-            println("onState: $state")
-        }
-
-        override fun onClear() {
-            println("onClear")
-        }
-    }
 }

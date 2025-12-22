@@ -6,7 +6,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.EmptyCoroutineContext
 
 internal object ScopeProvider {
-    internal fun createViewModelScope(): CoroutineScope {
+    internal fun createMviScope(): CoroutineScope {
         val dispatcher =
             try {
                 // In platforms where `Dispatchers.Main` is not available, Kotlin Multiplatform will

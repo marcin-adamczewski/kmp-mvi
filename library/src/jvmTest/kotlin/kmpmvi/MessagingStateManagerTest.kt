@@ -1,17 +1,14 @@
 package kmpmvi
 
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
+import com.adamczewski.kmpmvi.mvi.MviStateManager
+import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
-import com.adamczewski.kmpmvi.mvi.MviStateManager
 import com.adamczewski.kmpmvi.mvi.model.NoActions
 import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.model.NoState
-import com.adamczewski.kmpmvi.mvi.Settings
-import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -23,8 +20,6 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class MessagingStateManagerTest {
-
-    private val scopeProvider = { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
 
     @BeforeEach
     fun beforeEach() {
@@ -42,7 +37,6 @@ class MessagingStateManagerTest {
         var receivedMessage: String? = null
         val parentStateManager =
             object : MviStateManager<NoActions, NoState, NoEffects>(
-                settings = Settings(scopeProvider = scopeProvider),
                 initialState = NoState
             ) {
                 init {
@@ -104,7 +98,6 @@ private sealed interface TestMessagingMessage : MviMessage {
 private class TestMessagingStateManager :
     BaseMviStateManager<TestMessagingAction, NoState, NoEffects, TestMessagingMessage>(
         initialState = NoState,
-        settings = Settings(scopeProvider = { CoroutineScope(SupervisorJob() + Dispatchers.Main) })
     ) {
     override fun ActionsManager<TestMessagingAction>.handleActions() {
         onAction<TestMessagingAction.ProcessMessage> { action ->

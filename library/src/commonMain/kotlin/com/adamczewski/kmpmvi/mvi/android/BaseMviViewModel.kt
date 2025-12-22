@@ -62,7 +62,9 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
     val messages: Flow<Message> = component.messenger.messages
 
     init {
-        component.actions.handleActions()
+        component.handleActions {
+            handleActions()
+        }
     }
 
     fun onInit(block: suspend () -> Unit) {

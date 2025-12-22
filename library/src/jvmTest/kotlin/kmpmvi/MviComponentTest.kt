@@ -3,12 +3,14 @@ package kmpmvi
 import app.cash.turbine.test
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.MviComponent
+import com.adamczewski.kmpmvi.mvi.actions.ActionsManager.ActionNotSubscribedException
 import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.test.testEffects
 import com.adamczewski.kmpmvi.test.testState
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -296,25 +299,54 @@ class MviComponentTest {
     inner class Actions {
         @Test
         fun `when flow passed to onActionFlow, then throw error`() {
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<ActionNotSubscribedException> {
                 runTest {
-                    createSut().actions.onActionFlow<TestAction> {
-                        flowOf(1)
+                    createSut().handleActions {
+                        onActionFlow<TestAction> {
+                            flowOf(1)
+                        }
                     }
                 }
             }
         }
 
         @Test
+        fun `when action submitted before subscribers, then postpone emitting action until subscribers`() =
+            runTest {
+                val sut = createSut()
+                sut.submitAction(TestAction.QueryChanged("query"))
+                sut.submitAction(TestAction.Refresh)
+
+                sut.handleActions {
+                    onActionFlow<TestAction.QueryChanged> {
+                        mapLatest { sut.setState { copy(value = it.query) } }
+                    }
+
+                    onAction<TestAction.Refresh> {
+                        sut.setState { copy(refreshed = true) }
+                    }
+                }
+
+                sut.testState(this) {
+                    assertEquals(
+                        TestState(value = "query", refreshed = true),
+                        expectMostRecentItem()
+                    )
+                }
+            }
+
+        @Test
         fun `given action handled in onActionFlow, when action submitted twice, then action handled twice`() =
             runTest {
                 val sut = createSut()
                 sut.testState(this) {
-                    sut.actions.onActionFlow<TestAction.QueryChanged> {
-                        map { "test ${it.query}" }
-                            .onEach { newValue ->
-                                sut.setState { copy(value = newValue) }
-                            }
+                    sut.handleActions {
+                        onActionFlow<TestAction.QueryChanged> {
+                            map { "test ${it.query}" }
+                                .onEach { newValue ->
+                                    sut.setState { copy(value = newValue) }
+                                }
+                        }
                     }
 
                     submitAction(TestAction.QueryChanged("query1"))
@@ -330,12 +362,14 @@ class MviComponentTest {
             runTest {
                 val sut = createSut()
                 sut.testState(this) {
-                    sut.actions.onActionFlowSingle<TestAction.QueryChanged> { queryChanged ->
-                        flowOf("test")
-                            .map { "$it ${queryChanged.query}" }
-                            .onEach { newValue ->
-                                sut.setState { copy(value = newValue) }
-                            }
+                    sut.handleActions {
+                        onActionFlowSingle<TestAction.QueryChanged> { queryChanged ->
+                            flowOf("test")
+                                .map { "$it ${queryChanged.query}" }
+                                .onEach { newValue ->
+                                    sut.setState { copy(value = newValue) }
+                                }
+                        }
                     }
 
                     submitAction(TestAction.QueryChanged("query1"))
@@ -351,8 +385,10 @@ class MviComponentTest {
             runTest {
                 val sut = createSut()
                 sut.testState(this) {
-                    sut.actions.onAction<TestAction.QueryChanged> { queryChanged ->
-                        sut.setState { copy(value = queryChanged.query) }
+                    sut.handleActions {
+                        onAction<TestAction.QueryChanged> { queryChanged ->
+                            sut.setState { copy(value = queryChanged.query) }
+                        }
                     }
 
                     submitAction(TestAction.QueryChanged("query1"))
@@ -368,8 +404,10 @@ class MviComponentTest {
             runTest {
                 val sut = createSut()
                 sut.testState(this) {
-                    sut.actions.onActionSingle<TestAction.QueryChanged> { queryChanged ->
-                        sut.setState { copy(value = queryChanged.query) }
+                    sut.handleActions {
+                        onActionSingle<TestAction.QueryChanged> { queryChanged ->
+                            sut.setState { copy(value = queryChanged.query) }
+                        }
                     }
 
                     submitAction(TestAction.QueryChanged("query1"))
@@ -393,8 +431,10 @@ class MviComponentTest {
                         caughtError = exception
                     }
                 )
-                sut.actions.onActionSingle<TestAction.QueryChanged> {
-                    throw testError
+                sut.handleActions {
+                    onActionSingle<TestAction.QueryChanged> {
+                        throw testError
+                    }
                 }
 
                 sut.submitAction(TestAction.QueryChanged("query1"))
@@ -412,8 +452,10 @@ class MviComponentTest {
                         caughtError = exception
                     }
                 )
-                sut.actions.onAction<TestAction.QueryChanged> {
-                    throw testError
+                sut.handleActions {
+                    onAction<TestAction.QueryChanged> {
+                        throw testError
+                    }
                 }
 
                 sut.submitAction(TestAction.QueryChanged("query1"))
@@ -432,10 +474,12 @@ class MviComponentTest {
                         caughtError = exception
                     }
                 )
-                sut.actions.onActionFlowSingle<TestAction.QueryChanged> {
-                    flow {
-                        emit(1)
-                        throw testError
+                sut.handleActions {
+                    onActionFlowSingle<TestAction.QueryChanged> {
+                        flow {
+                            emit(1)
+                            throw testError
+                        }
                     }
                 }
 
@@ -455,9 +499,11 @@ class MviComponentTest {
                         caughtError = exception
                     }
                 )
-                sut.actions.onActionFlow<TestAction.QueryChanged> {
-                    mapLatest {
-                        throw testError
+                sut.handleActions {
+                    onActionFlow<TestAction.QueryChanged> {
+                        mapLatest {
+                            throw testError
+                        }
                     }
                 }
 
@@ -496,67 +542,68 @@ class MviComponentTest {
         }
 
         @Test
-        fun `when subscribed, then call onSubscribe, when unsubscribe, then call onUnsubscribe`() = runTest {
-            val sut = createSut()
-            var subscribeCount = 0
-            var unsubscribeCount = 0
+        fun `when subscribed, then call onSubscribe, when unsubscribe, then call onUnsubscribe`() =
+            runTest {
+                val sut = createSut()
+                var subscribeCount = 0
+                var unsubscribeCount = 0
 
-            launch {
-                sut.onSubscribe {
-                    subscribeCount++
+                launch {
+                    sut.onSubscribe {
+                        subscribeCount++
+                    }
+
+                    sut.onUnsubscribe {
+                        unsubscribeCount++
+                    }
                 }
+                advanceUntilIdle()
 
-                sut.onUnsubscribe {
-                    unsubscribeCount++
+                assertEquals(0, subscribeCount)
+                assertEquals(0, unsubscribeCount)
+
+                val job1 = launch {
+                    sut.currentState.collect { }
                 }
+                advanceUntilIdle()
+
+                assertEquals(1, subscribeCount)
+                assertEquals(0, unsubscribeCount)
+
+                val job2 = launch {
+                    sut.currentState.collect { }
+                }
+                advanceUntilIdle()
+
+                assertEquals(1, subscribeCount)
+                assertEquals(0, unsubscribeCount)
+
+                job1.cancel()
+                advanceUntilIdle()
+
+                assertEquals(1, subscribeCount)
+                assertEquals(0, unsubscribeCount)
+
+                job2.cancel()
+                advanceUntilIdle()
+
+                assertEquals(1, subscribeCount)
+                assertEquals(1, unsubscribeCount)
+
+                val job3 = launch {
+                    sut.currentState.collect { }
+                }
+                advanceUntilIdle()
+
+                assertEquals(2, subscribeCount)
+                assertEquals(1, unsubscribeCount)
+
+                job3.cancel()
+                advanceUntilIdle()
+
+                assertEquals(2, subscribeCount)
+                assertEquals(2, unsubscribeCount)
             }
-            advanceUntilIdle()
-
-            assertEquals(0, subscribeCount)
-            assertEquals(0, unsubscribeCount)
-
-            val job1 = launch {
-                sut.currentState.collect {  }
-            }
-            advanceUntilIdle()
-
-            assertEquals(1, subscribeCount)
-            assertEquals(0, unsubscribeCount)
-
-            val job2 = launch {
-                sut.currentState.collect {  }
-            }
-            advanceUntilIdle()
-
-            assertEquals(1, subscribeCount)
-            assertEquals(0, unsubscribeCount)
-
-            job1.cancel()
-            advanceUntilIdle()
-
-            assertEquals(1, subscribeCount)
-            assertEquals(0, unsubscribeCount)
-
-            job2.cancel()
-            advanceUntilIdle()
-
-            assertEquals(1, subscribeCount)
-            assertEquals(1, unsubscribeCount)
-
-            val job3 = launch {
-                sut.currentState.collect {  }
-            }
-            advanceUntilIdle()
-
-            assertEquals(2, subscribeCount)
-            assertEquals(1, unsubscribeCount)
-
-            job3.cancel()
-            advanceUntilIdle()
-
-            assertEquals(2, subscribeCount)
-            assertEquals(2, unsubscribeCount)
-        }
 
     }
 
@@ -577,8 +624,12 @@ class MviComponentTest {
 
     private sealed interface TestAction : MviAction {
         data class QueryChanged(val query: String) : TestAction
+        data object Refresh : TestAction
     }
 
-    private data class TestState(val value: String = "") : MviState
+    private data class TestState(
+        val value: String = "",
+        val refreshed: Boolean = false
+    ) : MviState
 
 }

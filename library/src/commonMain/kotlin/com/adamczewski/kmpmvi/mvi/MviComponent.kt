@@ -12,6 +12,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.NoMessages
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.PublishedApi
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias MviComponent<A, S, E> = BaseMviComponent<A, S, E, NoMessages>
@@ -37,6 +39,7 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,
 ) : StateComponent<Action, State, Effects> {
+    private val handleActionCalled = CompletableDeferred<Unit>()
 
     private val logger: MviLogger by lazy {
         if (MviConfig.canLog) {
@@ -66,7 +69,7 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    internal val actions = ActionsManager<Action>(scope)
+    private val actions = ActionsManager<Action>(scope, handleActionCalled)
 
     val progress = ProgressCounter()
 
@@ -82,6 +85,11 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
         scope.launch {
             initLogger(initialState)
         }
+    }
+
+    fun handleActions(block: ActionsManager<Action>.() -> Unit) {
+        actions.block()
+        handleActionCalled.complete(Unit)
     }
 
     fun onInit(block: suspend () -> Unit) {

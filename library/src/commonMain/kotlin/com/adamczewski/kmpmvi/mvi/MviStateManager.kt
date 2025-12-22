@@ -46,7 +46,9 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
     val messages: Flow<Message> = component.messenger.messages
 
     init {
-        component.actions.handleActions()
+        component.handleActions {
+            handleActions()
+        }
     }
 
     /**

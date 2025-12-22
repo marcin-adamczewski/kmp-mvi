@@ -1,5 +1,6 @@
 package com.adamczewski.kmpmvi.mvi
 
+import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,7 +24,7 @@ interface ProgressObservable {
 class ProgressCounter : ProgressObservable {
     private val count = AtomicInt(0)
     private val progressState = MutableStateFlow(count.load())
-    private var refreshingIds = mutableSetOf<String>()
+    private var refreshingIds = AtomicMutableSet<String>()
 
     override val observeState: Flow<Boolean> =
         progressState.map { it > 0 }.drop(1).distinctUntilChanged()

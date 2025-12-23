@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalUuidApi::class)
+
 package com.adamczewski.kmpmvi.mvi.progress
 
 import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
@@ -12,7 +14,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.update
-import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 interface ProgressObservable {
     val observeState: Flow<Boolean>
@@ -23,7 +26,7 @@ class ProgressCounter : ProgressObservable {
     // in UI state.
     private val initialValue = -1
     private val progressState = MutableStateFlow(initialValue)
-    private var refreshingIds = AtomicMutableSet<String>()
+    private var progressIds = AtomicMutableSet<String>()
 
     override val observeState: Flow<Boolean> =
         progressState
@@ -32,15 +35,15 @@ class ProgressCounter : ProgressObservable {
             .distinctUntilChanged()
 
     // coercedAtLeast is used to be able to increment over an initial negative value
-    fun addProgress() {
-        progressState.update {
-            it.coerceAtLeast(0) + 1
+    fun addProgress(id: String) {
+        if (progressIds.add(id)) {
+            progressState.update { it.coerceAtLeast(0) + 1 }
         }
     }
 
-    fun removeProgress() {
-        progressState.update {
-            (it - 1).coerceAtLeast(0)
+    fun removeProgress(id: String) {
+        if (progressIds.remove(id)) {
+            progressState.update { (it - 1).coerceAtLeast(0) }
         }
     }
 
@@ -50,15 +53,33 @@ class ProgressCounter : ProgressObservable {
      */
     fun setRefreshing(refresh: Boolean, refreshId: String) {
         if (refresh) {
-            if (refreshingIds.add(refreshId)) {
-                addProgress()
-            }
+            addProgress(refreshId)
         } else {
-            if (refreshingIds.remove(refreshId)) {
-                removeProgress()
-            }
+            removeProgress(refreshId)
         }
     }
+}
+
+private fun generateId(): String = Uuid.random().toString()
+
+/**
+ * Shows progress immediately on start, and hides in either on error or on the first value.
+ * Other value events are ignored and won't decrease counter as we don't want
+ * to accidentally decrease other pending progresses counter, e.g. when we fetch values in
+ * cacheAndFresh manner, when two values are emitted from this Flow.
+ */
+fun <T> Flow<T>.watchProgress(counter: ProgressCounter): Flow<T> {
+    val id = generateId()
+    return onStart { counter.addProgress(id) }
+        .onEach { counter.removeProgress(id) }
+        .onCompletion { counter.removeProgress(id) }
+}
+
+fun <T> SharedFlow<T>.watchProgress(counter: ProgressCounter): Flow<T> {
+    val id = generateId()
+    return onSubscription { counter.addProgress(id) }
+        .onEach { counter.removeProgress(id) }
+        .onCompletion { counter.removeProgress(id) }
 }
 
 /**
@@ -79,41 +100,16 @@ fun <T> Flow<T>.watchProgressAndRefreshing(
         }
 }
 
-/**
- * Shows progress immediately on start, and hides in either on error or on the first value.
- * Other value events are ignored and won't decrease counter as we don't want
- * to accidentally decrease other pending progresses counter, e.g. when we fetch values in
- * cacheAndFresh manner, when two values are emitted from this Flow.
- */
-fun <T> Flow<T>.watchProgress(counter: ProgressCounter): Flow<T> {
-    return onStart { counter.addProgress() }
-        .removeProgressOnAny(counter)
-}
-
-fun <T> SharedFlow<T>.watchProgress(counter: ProgressCounter): Flow<T> {
-    return onSubscription { counter.addProgress() }
-        .removeProgressOnAny(counter)
-}
-
-private fun <T> Flow<T>.removeProgressOnAny(counter: ProgressCounter): Flow<T> {
-    val decreased = AtomicBoolean(false)
-    fun decreaseCounter() {
-        if (decreased.compareAndSet(expectedValue = false, newValue = true)) {
-            counter.removeProgress()
-        }
-    }
-    return this.onEach { decreaseCounter() }
-        .onCompletion { decreaseCounter() }
-}
 
 suspend fun <T> withProgress(
     progressCounter: ProgressCounter,
     block: suspend () -> T,
 ): T {
-    progressCounter.addProgress()
+    val id = generateId()
+    progressCounter.addProgress(id)
     try {
         return block()
     } finally {
-        progressCounter.removeProgress()
+        progressCounter.removeProgress(id)
     }
 }

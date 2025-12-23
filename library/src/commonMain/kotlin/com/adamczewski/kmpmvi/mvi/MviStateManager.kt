@@ -80,7 +80,7 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
         component.submitAction(action)
     }
 
-    protected suspend fun setState(reducer: State.() -> State) {
+    protected fun setState(reducer: State.() -> State) {
         component.setState(reducer)
     }
 

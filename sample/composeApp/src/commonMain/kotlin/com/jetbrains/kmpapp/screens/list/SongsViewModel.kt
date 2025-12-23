@@ -8,7 +8,7 @@ import com.adamczewski.kmpmvi.mvi.android.MviViewModel
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
-import com.adamczewski.kmpmvi.mvi.watchProgressAndRefreshing
+import com.adamczewski.kmpmvi.mvi.progress.watchProgressAndRefreshing
 import com.jetbrains.kmpapp.data.MusicRepository
 import com.jetbrains.kmpapp.data.Song
 import com.jetbrains.kmpapp.screens.list.SongsAction.Init

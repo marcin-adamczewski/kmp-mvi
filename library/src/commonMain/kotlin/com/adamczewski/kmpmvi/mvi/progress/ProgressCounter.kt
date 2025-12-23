@@ -1,40 +1,47 @@
-package com.adamczewski.kmpmvi.mvi
+package com.adamczewski.kmpmvi.mvi.progress
 
 import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.update
 import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.decrementAndFetch
-import kotlin.concurrent.atomics.incrementAndFetch
 
 interface ProgressObservable {
     val observeState: Flow<Boolean>
 }
 
 class ProgressCounter : ProgressObservable {
-    private val count = AtomicInt(0)
-    private val progressState = MutableStateFlow(count.load())
+    // Initial value is -1 so we can easily filter it out as the initial state should be defined
+    // in UI state.
+    private val initialValue = -1
+    private val progressState = MutableStateFlow(initialValue)
     private var refreshingIds = AtomicMutableSet<String>()
 
     override val observeState: Flow<Boolean> =
-        progressState.map { it > 0 }.drop(1).distinctUntilChanged()
+        progressState
+            .filter { it != initialValue }
+            .map { it > 0 }
+            .distinctUntilChanged()
 
+    // coercedAtLeast is used to be able to increment over an initial negative value
     fun addProgress() {
-        progressState.value = count.incrementAndFetch()
+        progressState.update {
+            it.coerceAtLeast(0) + 1
+        }
     }
 
     fun removeProgress() {
-        progressState.value = count.decrementAndFetch()
+        progressState.update {
+            (it - 1).coerceAtLeast(0)
+        }
     }
 
     /**
@@ -43,24 +50,15 @@ class ProgressCounter : ProgressObservable {
      */
     fun setRefreshing(refresh: Boolean, refreshId: String) {
         if (refresh) {
-            refreshingIds.add(refreshId)
-            addProgress()
-        } else if (refreshingIds.contains(refreshId)) {
-            refreshingIds.remove(refreshId)
-            if (count.load() > 0) {
+            if (refreshingIds.add(refreshId)) {
+                addProgress()
+            }
+        } else {
+            if (refreshingIds.remove(refreshId)) {
                 removeProgress()
             }
         }
     }
-}
-
-class CombinedProgressPublisher(
-    vararg progressObservables: ProgressObservable,
-) : ProgressObservable {
-    override val observeState: Flow<Boolean> =
-        combine(progressObservables.map { it.observeState }) { progresses ->
-            progresses.any { isInProgress -> isInProgress }
-        }
 }
 
 /**

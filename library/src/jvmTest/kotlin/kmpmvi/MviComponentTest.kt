@@ -533,7 +533,7 @@ class MviComponentTest {
         }
 
         @Test
-        fun `verify state has initially one subscriber`() = runTest {
+        fun `verify state has initially zero subscribers`() = runTest {
             createSut().subscribersCount.test {
                 assertEquals(1, awaitItem())
             }

@@ -3,6 +3,7 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
+import com.adamczewski.kmpmvi.mvi.lifecycle.LifecycleManager
 import com.adamczewski.kmpmvi.mvi.logger.MviLogger
 import com.adamczewski.kmpmvi.mvi.logger.NoOpLogger
 import com.adamczewski.kmpmvi.mvi.messenger.Messenger
@@ -20,19 +21,10 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.PublishedApi
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias MviComponent<A, S, E> = BaseMviComponent<A, S, E, NoMessages>
@@ -66,19 +58,15 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
 
     private val effectsManager = EffectsManager<Effects>(settings.effectsBufferSize)
 
-    private val isStateSubscribed: StateFlow<Boolean?> = stateFlow.subscriptionCount
-        .drop(2) // We're not interested in initial 0 value and the first logger subscriber
-        .map { it >= MIN_SUBSCRIBERS_COUNT }
-        .distinctUntilChanged()
-        .stateIn(scope, SharingStarted.Eagerly, null)
-
     private val actions = ActionsManager<Action>(scope, handleActionCalled)
 
-    val progress = ProgressManager()
+    private val lifecycleManager = LifecycleManager(stateFlow.subscriptionCount, scope, logger)
 
     override val currentState: StateFlow<State> = stateFlow
 
     override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
+
+    val progress = ProgressManager()
 
     val subscribersCount: StateFlow<Int> = stateFlow.subscriptionCount
 
@@ -96,35 +84,15 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
     }
 
     fun onInit(block: suspend () -> Unit) {
-        isStateSubscribed
-            .filter { it == true }
-            .take(1)
-            .onEach {
-                logger.onInit()
-                block()
-            }
-            .launchIn(scope)
+        lifecycleManager.onInit(block)
     }
 
-
     fun onSubscribe(block: suspend () -> Unit) {
-        isStateSubscribed
-            .filter { it == true }
-            .onEach {
-                logger.onSubscribe()
-                block()
-            }
-            .launchIn(scope)
+        lifecycleManager.onSubscribe(block)
     }
 
     fun onUnsubscribe(block: suspend () -> Unit) {
-        isStateSubscribed
-            .filter { it == false }
-            .onEach {
-                logger.onUnsubscribe()
-                block()
-            }
-            .launchIn(scope)
+        lifecycleManager.onUnsubscribe(block)
     }
 
     fun setState(reducer: State.() -> State) {
@@ -199,10 +167,5 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
                 logger.onMessage(it)
             }
         }
-    }
-
-    private companion object {
-        // One subscriber is for a logger
-        private const val MIN_SUBSCRIBERS_COUNT = 2
     }
 }

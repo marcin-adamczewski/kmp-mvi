@@ -8,7 +8,7 @@ import com.adamczewski.kmpmvi.mvi.android.MviViewModel
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
-import com.adamczewski.kmpmvi.mvi.progress.watchProgressAndRefreshing
+import com.adamczewski.kmpmvi.mvi.progress.watchProgress
 import com.jetbrains.kmpapp.data.MusicRepository
 import com.jetbrains.kmpapp.data.Song
 import com.jetbrains.kmpapp.screens.list.SongsAction.Init
@@ -48,7 +48,7 @@ class SongsViewModel(
         onActionFlowSingle<Init> {
             searchQuery.flatMapLatest { query ->
                 musicRepository.getSongs(query = query)
-                    .watchProgressAndRefreshing(progress, PULL_TO_REFRESH_ID)
+                    .watchProgress(progress, PULL_TO_REFRESH_ID)
                     .onSuccess { songs ->
                         setState { copy(songs = songs, error = null) }
                     }
@@ -57,12 +57,12 @@ class SongsViewModel(
         }
 
         onAction<PulledToRefresh> {
-            progress.setRefreshing(true, PULL_TO_REFRESH_ID)
+            progress.addProgress(PULL_TO_REFRESH_ID)
             musicRepository.refresh()
         }
 
         onAction<RetryClicked> {
-            progress.setRefreshing(true, PULL_TO_REFRESH_ID)
+            progress.addProgress(PULL_TO_REFRESH_ID)
             musicRepository.refresh()
         }
 

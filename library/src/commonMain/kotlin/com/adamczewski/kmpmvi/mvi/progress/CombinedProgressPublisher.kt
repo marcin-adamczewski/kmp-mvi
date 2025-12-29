@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.combine
 class CombinedProgressPublisher(
     vararg progressObservables: ProgressObservable,
 ) : ProgressObservable {
-    override val observeState: Flow<Boolean> =
-        combine(progressObservables.map { it.observeState }) { progresses ->
+    override val isLoading: Flow<Boolean> =
+        combine(progressObservables.map { it.isLoading }) { progresses ->
             progresses.any { isInProgress -> isInProgress }
         }
 }

@@ -11,7 +11,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.NoMessages
-import com.adamczewski.kmpmvi.mvi.progress.ProgressCounter
+import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.progress.withProgress
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
@@ -74,7 +74,7 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
 
     private val actions = ActionsManager<Action>(scope, handleActionCalled)
 
-    val progress = ProgressCounter()
+    val progress = ProgressManager()
 
     override val currentState: StateFlow<State> = stateFlow
 
@@ -150,7 +150,7 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
         block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
     ) {
         scope.launch {
-            progressObservable.observeState.collect { showProgress ->
+            progressObservable.isLoading.collect { showProgress ->
                 block(showProgress)
             }
         }
@@ -162,7 +162,7 @@ class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect,
     suspend fun <T> withProgress(
         block: suspend () -> T,
     ): T {
-        return withProgress(progress, block)
+        return withProgress(manager = progress, block = block)
     }
 
     fun clear() {

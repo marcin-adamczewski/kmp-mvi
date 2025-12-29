@@ -11,7 +11,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.NoMessages
-import com.adamczewski.kmpmvi.mvi.progress.ProgressCounter
+import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.StateComponent
@@ -57,7 +57,7 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
 
     override val effects: EffectsHandler<Effect> = component.effects
 
-    val progress: ProgressCounter = component.progress
+    val progress: ProgressManager = component.progress
 
     val messages: Flow<Message> = component.messenger.messages
 

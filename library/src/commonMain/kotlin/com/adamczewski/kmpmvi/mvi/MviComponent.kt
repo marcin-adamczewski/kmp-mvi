@@ -27,9 +27,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
-typealias MviComponent<A, S, E> = BaseMviComponent<A, S, E, NoMessages>
+typealias MviContainer<A, S, E> = BaseMviContainer<A, S, E, NoMessages>
 
-class BaseMviComponent<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
+class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,

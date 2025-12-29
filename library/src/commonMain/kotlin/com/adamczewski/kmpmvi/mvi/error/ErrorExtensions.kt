@@ -1,10 +1,10 @@
 package com.adamczewski.kmpmvi.mvi.error
 
-import com.adamczewski.kmpmvi.mvi.BaseMviComponent
+import com.adamczewski.kmpmvi.mvi.BaseMviContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun BaseMviComponent<*, *, *, *>.observeError(
+fun BaseMviContainer<*, *, *, *>.observeError(
     errorManager: ErrorManager,
     block: suspend CoroutineScope.(UiError?) -> Unit,
 ) {

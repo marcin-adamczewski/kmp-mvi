@@ -1,7 +1,7 @@
 package kmpmvi
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.MviComponent
+import com.adamczewski.kmpmvi.mvi.MviContainer
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager.ActionNotSubscribedException
 import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
 import com.adamczewski.kmpmvi.mvi.model.MviAction
@@ -36,7 +36,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-class MviComponentTest {
+class MviContainerTest {
 
     @AfterEach
     fun cleanUp() {
@@ -49,14 +49,14 @@ class MviComponentTest {
         initialState: TestState = TestState(),
         effectsBufferSize: Int = 10,
         exceptionHandler: CoroutineExceptionHandler? = null,
-    ): MviComponent<TestAction, TestState, TestEffect> {
+    ): MviContainer<TestAction, TestState, TestEffect> {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
-        return MviComponent<TestAction, TestState, TestEffect>(
+        return MviContainer<TestAction, TestState, TestEffect>(
             scopeProvider = scopeProvider,
             initialState = initialState,
             settings = MviSettings(
-                logger = { DefaultMviLogger("ComponentTest") },
+                logger = { DefaultMviLogger("MviContainerTest") },
                 effectsBufferSize = effectsBufferSize,
                 exceptionHandler = exceptionHandler,
                 scopeProvider = scopeProvider

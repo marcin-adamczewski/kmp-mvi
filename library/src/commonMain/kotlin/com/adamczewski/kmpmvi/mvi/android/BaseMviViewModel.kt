@@ -2,7 +2,7 @@ package com.adamczewski.kmpmvi.mvi.android
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.adamczewski.kmpmvi.mvi.BaseMviComponent
+import com.adamczewski.kmpmvi.mvi.BaseMviContainer
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
 import com.adamczewski.kmpmvi.mvi.Closeable
 import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
@@ -35,13 +35,13 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
 
     private val closeables = mutableListOf(*closeables)
 
-    protected val component = BaseMviComponent<Action, State, Effect, Message>(
+    protected val container = BaseMviContainer<Action, State, Effect, Message>(
         scopeProvider = { viewModelScope },
         initialState = initialState,
         settings = settings ?: defaultSettings()
     )
 
-    protected val scope = component.scope
+    protected val scope = container.scope
 
     /**
      * Override this method to handle actions.
@@ -50,107 +50,107 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
      */
     protected abstract fun ActionsManager<Action>.handleActions()
 
-    override val currentState: StateFlow<State> = component.currentState
+    override val currentState: StateFlow<State> = container.currentState
 
     protected val stateValue: State
         get() = currentState.value
 
-    override val effects: EffectsHandler<Effect> = component.effects
+    override val effects: EffectsHandler<Effect> = container.effects
 
-    val progress: ProgressManager = component.progress
+    val progress: ProgressManager = container.progress
 
-    val messages: Flow<Message> = component.messenger.messages
+    val messages: Flow<Message> = container.messenger.messages
 
     init {
-        component.handleActions {
+        container.handleActions {
             handleActions()
         }
     }
 
     fun onInit(block: suspend () -> Unit) {
-        component.onInit(block)
+        container.onInit(block)
     }
 
     fun onSubscribe(block: suspend () -> Unit) {
-        component.onSubscribe(block)
+        container.onSubscribe(block)
     }
 
     fun onUnsubscribe(block: suspend () -> Unit) {
-        component.onUnsubscribe(block)
+        container.onUnsubscribe(block)
     }
 
     override fun onCleared() {
-        component.clear()
+        container.clear()
         closeables.forEach { it.close() }
         super.onCleared()
     }
 
     final override fun submitAction(action: Action) {
-        component.submitAction(action)
+        container.submitAction(action)
     }
 
     protected fun setState(reducer: State.() -> State) {
-        component.setState(reducer)
+        container.setState(reducer)
     }
 
     protected suspend fun setEffect(
         reducer: suspend State.() -> Effect,
     ) {
-        component.setEffect(requireConsumer = false, reducer)
+        container.setEffect(requireConsumer = false, reducer)
     }
 
     protected suspend fun setEffectIfActive(
         reducer: suspend State.() -> Effect,
     ) {
-        component.setEffect(requireConsumer = true, reducer)
+        container.setEffect(requireConsumer = true, reducer)
     }
 
     protected suspend fun setMessage(reducer: suspend State.() -> Message) {
-        component.messenger.setMessage(reducer(stateValue))
+        container.messenger.setMessage(reducer(stateValue))
     }
 
     protected inline fun <reified M : MviMessage> onMessageFlow(
         child: BaseMviStateManager<*, *, *, in M>,
         noinline flowMapper: suspend Flow<M>.() -> Flow<*>,
     ) {
-        component.messenger.onMessageFlow(M::class, child, flowMapper)
+        container.messenger.onMessageFlow(M::class, child, flowMapper)
     }
 
     protected inline fun <reified M : MviMessage> onMessage(
         child: BaseMviStateManager<*, *, *, in M>,
         noinline block: suspend (M) -> Unit,
     ) {
-        component.messenger.onMessage(M::class, child, block)
+        container.messenger.onMessage(M::class, child, block)
     }
 
     protected fun observeProgress(
         vararg progressObservables: ProgressObservable,
         block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
     ) {
-        component.observeProgress(CombinedProgressPublisher(*progressObservables), block)
+        container.observeProgress(CombinedProgressPublisher(*progressObservables), block)
     }
 
     protected fun observeProgress(
         progressObservable: ProgressObservable,
         block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
     ) {
-        component.observeProgress(progressObservable, block)
+        container.observeProgress(progressObservable, block)
     }
 
     protected fun observeProgress(
         block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
     ) {
-        component.observeProgress(block)
+        container.observeProgress(block)
     }
 
     protected suspend fun <T> withProgress(block: suspend () -> T) =
-        component.withProgress(block)
+        container.withProgress(block)
 
     protected fun observeError(
         errorManager: ErrorManager,
         block: suspend CoroutineScope.(UiError?) -> Unit,
     ) {
-        component.observeError(errorManager, block)
+        container.observeError(errorManager, block)
     }
 
     protected fun addCloseable(closeable: Closeable) {

@@ -57,7 +57,7 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('**/.lock') }}
 
     - name: Build Library and Run Tests
-      run: ./gradlew :library:${{ matrix.target }}
+      run: ./gradlew :core:${{ matrix.target }}
 
     - name: Build Sample App and Run Tests
       if: matrix.os == 'ubuntu-latest' && matrix.target == 'jvmTest'

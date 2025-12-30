@@ -29,6 +29,8 @@ jobs:
             os: ubuntu-latest
           - target: testAndroidHostTest
             os: ubuntu-latest
+          - target: wasmJsTest
+            os: ubuntu-latest
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -66,3 +68,7 @@ jobs:
     - name: Build Sample App (iOS)
       if: matrix.os == 'macos-latest'
       run: ./gradlew :sample:composeApp:assembleDebug
+
+    - name: Build Sample App (Wasm)
+      if: matrix.target == 'wasmJsTest'
+      run: ./gradlew :sample:composeApp:wasmJsBrowserDistribution

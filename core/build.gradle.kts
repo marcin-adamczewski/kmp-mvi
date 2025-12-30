@@ -7,9 +7,6 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "com.adamczewski.kmpmvi"
-version = "1.0.0-alpha1"
-
 kotlin {
     jvm()
     androidLibrary {

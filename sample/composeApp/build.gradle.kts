@@ -40,7 +40,7 @@ kotlin {
         iosMain.dependencies {
         }
         commonMain.dependencies {
-            implementation(project(":library"))
+            implementation(project(":core"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)

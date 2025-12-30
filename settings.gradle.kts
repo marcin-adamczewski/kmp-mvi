@@ -20,6 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kmp-mvi"
-include(":library")
+include(":core")
 include(":test")
 include(":sample:composeApp")

@@ -49,6 +49,13 @@ jobs:
         gradle-version: wrapper
         cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
+    - name: konan cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.konan
+        key: ${{ runner.os }}-${{ hashFiles('**/.lock') }}
+
     - name: Build Library and Run Tests
       run: ./gradlew :library:${{ matrix.target }}
 

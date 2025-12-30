@@ -39,6 +39,8 @@ kotlin {
     sourceSets {
         all {
             languageSettings.optIn("kotlin.concurrent.atomics.ExperimentalAtomicApi")
+            languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+            languageSettings.optIn("kotlinx.coroutines.FlowPreview")
         }
 
         commonMain.dependencies {

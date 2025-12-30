@@ -29,6 +29,10 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+            languageSettings.optIn("kotlinx.coroutines.FlowPreview")
+        }
         androidMain.dependencies {
             implementation(sampleLibs.androidx.compose.ui.tooling.preview)
             implementation(sampleLibs.androidx.activity.compose)

@@ -32,6 +32,11 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
     linuxX64()
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
 
     sourceSets {
         all {

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -33,15 +32,15 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.jetbrains.kmpapp.data.Song
 import com.jetbrains.kmpapp.screens.EmptyScreenContent
-import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -130,15 +129,14 @@ private fun SongsScreen(
 
 @Composable
 private fun SearchInput(submitAction: (SongsAction) -> Unit) {
-    val textState = rememberTextFieldState()
-    LaunchedEffect(textState) {
-        snapshotFlow { textState.text.toString() }.collectLatest { text ->
-            submitAction(SongsAction.SearchQueryChanged(text))
-        }
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(text) {
+        submitAction(SongsAction.SearchQueryChanged(text))
     }
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
-        state = textState,
+        value = text,
+        onValueChange = { text = it },
         shape = MaterialTheme.shapes.large,
         label = { Text("Search songs") },
     )

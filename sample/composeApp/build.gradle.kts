@@ -28,6 +28,16 @@ kotlin {
         }
     }
 
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
+        binaries.executable()
+    }
+
     sourceSets {
         all {
             languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
@@ -38,6 +48,9 @@ kotlin {
             implementation(sampleLibs.androidx.activity.compose)
         }
         iosMain.dependencies {
+        }
+        wasmJsMain.dependencies {
+            implementation(compose.ui)
         }
         commonMain.dependencies {
             implementation(project(":core"))

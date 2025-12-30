@@ -66,37 +66,3 @@ kotlin {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-
-mavenPublishing {
-    publishToMavenCentral()
-
-    signAllPublications()
-
-    coordinates(group.toString(), "library", version.toString())
-
-    pom {
-        name = "kmp-mvi"
-        description = "KMP MVI library"
-        inceptionYear = "2026"
-        url = "https://github.com/kotlin/multiplatform-library-template/"
-        licenses {
-            license {
-                name = "XXX"
-                url = "YYY"
-                distribution = "ZZZ"
-            }
-        }
-        developers {
-            developer {
-                id = "XXX"
-                name = "YYY"
-                url = "ZZZ"
-            }
-        }
-        scm {
-            url = "XXX"
-            connection = "YYY"
-            developerConnection = "ZZZ"
-        }
-    }
-}

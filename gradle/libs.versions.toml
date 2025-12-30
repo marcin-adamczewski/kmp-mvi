@@ -8,7 +8,7 @@ coroutines = "1.10.2"
 junit = "5.9.3"
 kotlin = "2.2.20"
 mockk = "1.14.2"
-vanniktechMavenPublish = "0.34.0"
+vanniktechMavenPublish = "0.35.0"
 
 [libraries]
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-viewmodel" }

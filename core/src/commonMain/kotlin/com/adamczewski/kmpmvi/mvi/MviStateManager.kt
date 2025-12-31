@@ -9,7 +9,6 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
-import com.adamczewski.kmpmvi.mvi.model.NoMessages
 import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
@@ -18,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, NoMessages>
+typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, Nothing>
 
 abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,

@@ -11,7 +11,6 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
-import com.adamczewski.kmpmvi.mvi.model.NoMessages
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.progress.withProgress
@@ -27,7 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
-typealias MviContainer<A, S, E> = BaseMviContainer<A, S, E, NoMessages>
+typealias MviContainer<A, S, E> = BaseMviContainer<A, S, E, Nothing>
 
 class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
     scopeProvider: () -> CoroutineScope,

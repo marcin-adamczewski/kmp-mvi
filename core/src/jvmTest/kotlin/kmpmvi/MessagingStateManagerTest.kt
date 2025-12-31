@@ -5,7 +5,6 @@ import com.adamczewski.kmpmvi.mvi.MviStateManager
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
-import com.adamczewski.kmpmvi.mvi.model.NoActions
 import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.model.NoState
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +35,7 @@ class MessagingStateManagerTest {
         val childStateManager = TestMessagingStateManager()
         var receivedMessage: String? = null
         val parentStateManager =
-            object : MviStateManager<NoActions, NoState, NoEffects>(
+            object : MviStateManager<Nothing, NoState, NoEffects>(
                 initialState = NoState
             ) {
                 init {
@@ -45,7 +44,7 @@ class MessagingStateManagerTest {
                     }
                 }
 
-                override fun ActionsManager<NoActions>.handleActions() {}
+                override fun ActionsManager<Nothing>.handleActions() {}
             }
 
         childStateManager.submitAction(TestMessagingAction.ProcessMessage(TEST_MESSAGE))
@@ -61,7 +60,7 @@ class MessagingStateManagerTest {
             val childStateManager = TestMessagingStateManager()
             var receivedMessage: String? = null
             val parentStateManager =
-                object : MviStateManager<NoActions, NoState, NoEffects>(
+                object : MviStateManager<Nothing, NoState, NoEffects>(
                     initialState = NoState
                 ) {
                     init {
@@ -72,7 +71,7 @@ class MessagingStateManagerTest {
                         }
                     }
 
-                    override fun ActionsManager<NoActions>.handleActions() {}
+                    override fun ActionsManager<Nothing>.handleActions() {}
                 }
 
             childStateManager.submitAction(TestMessagingAction.ProcessMessage(TEST_MESSAGE))

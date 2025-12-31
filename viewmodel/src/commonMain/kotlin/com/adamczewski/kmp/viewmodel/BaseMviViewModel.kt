@@ -17,8 +17,8 @@ import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.defaultSettings
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
-import com.adamczewski.kmpmvi.mvi.error.ErrorManager
-import com.adamczewski.kmpmvi.mvi.error.UiError
+import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
+import com.adamczewski.kmpmvi.mvi.error.Error
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -145,9 +145,9 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
     protected suspend fun <T> withProgress(block: suspend () -> T) =
         container.withProgress(block)
 
-    protected fun observeError(
-        errorManager: ErrorManager,
-        block: suspend CoroutineScope.(UiError?) -> Unit,
+    protected fun <E: Error> observeError(
+        errorManager: BaseErrorManager<E>,
+        block: suspend CoroutineScope.(E?) -> Unit,
     ) {
         container.observeError(errorManager, block)
     }

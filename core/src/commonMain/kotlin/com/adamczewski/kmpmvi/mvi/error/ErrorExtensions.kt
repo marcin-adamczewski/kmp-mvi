@@ -4,9 +4,9 @@ import com.adamczewski.kmpmvi.mvi.BaseMviContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun BaseMviContainer<*, *, *, *>.observeError(
-    errorManager: ErrorManager,
-    block: suspend CoroutineScope.(UiError?) -> Unit,
+fun <E: Error> BaseMviContainer<*, *, *, *>.observeError(
+    errorManager: BaseErrorManager<E>,
+    block: suspend CoroutineScope.(E?) -> Unit,
 ) {
     scope.launch {
         errorManager.errors.collect { error ->

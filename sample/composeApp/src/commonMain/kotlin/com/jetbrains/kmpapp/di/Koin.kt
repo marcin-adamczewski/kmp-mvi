@@ -1,5 +1,6 @@
 package com.jetbrains.kmpapp.di
 
+import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.jetbrains.kmpapp.data.MusicRepository
 import com.jetbrains.kmpapp.screens.detail.SongDetailViewModel

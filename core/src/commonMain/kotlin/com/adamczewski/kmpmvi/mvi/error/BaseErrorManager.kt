@@ -25,18 +25,20 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 
-class ErrorManager {
-    // We want a maximum of 3 errors queued
-    private val pendingErrors = Channel<UiError>(3, BufferOverflow.DROP_OLDEST)
+typealias ErrorManager = BaseErrorManager<UiError>
+
+class BaseErrorManager<E: Error> {
+    // Maximum of 3 errors are queued
+    private val pendingErrors = Channel<E>(3, BufferOverflow.DROP_OLDEST)
     private val removeErrorSignal = Channel<Unit>(Channel.RENDEZVOUS)
 
     /**
-     * A flow of [UiError]s to display in the UI, usually as snackbars. The flow will immediately
-     * emit `null`, and will then emit errors sent via [addError]. Once 6 seconds has elapsed,
+     * A flow of [Error]s to display in the UI, usually as snackbars. The flow will immediately
+     * emit `null`, and will then emit errors sent via [addError]. Once duration seconds has elapsed,
      * or [removeCurrentError] is called (if before that) `null` will be emitted to remove
      * the current error.
      */
-    val errors: Flow<UiError?> = flow {
+    val errors: Flow<E?> = flow {
         emit(null)
 
         pendingErrors.receiveAsFlow().collect { error ->
@@ -56,7 +58,7 @@ class ErrorManager {
         }
     }
 
-    suspend fun addError(error: UiError) {
+    suspend fun addError(error: E) {
         pendingErrors.send(error)
     }
 

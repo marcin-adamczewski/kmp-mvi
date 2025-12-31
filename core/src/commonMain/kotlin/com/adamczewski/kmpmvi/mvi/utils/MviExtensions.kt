@@ -1,5 +1,7 @@
-package com.adamczewski.kmpmvi.mvi
+package com.adamczewski.kmpmvi.mvi.utils
 
+import com.adamczewski.kmpmvi.mvi.MviConfig
+import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviState

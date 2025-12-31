@@ -15,7 +15,7 @@ import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.StateComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import com.adamczewski.kmpmvi.mvi.defaultSettings
+import com.adamczewski.kmpmvi.mvi.utils.defaultSettings
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.Error

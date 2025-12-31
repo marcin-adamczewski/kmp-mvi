@@ -1,4 +1,4 @@
-package com.adamczewski.kmpmvi.mvi.android
+package com.adamczewski.kmp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,7 +45,7 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
 
     /**
      * Override this method to handle actions.
-     * It's recommended to call only methods from provided [ActionsManager] in this method.
+     * It's recommended to call only methods from provided [com.adamczewski.kmpmvi.mvi.actions.ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
     protected abstract fun ActionsManager<Action>.handleActions()

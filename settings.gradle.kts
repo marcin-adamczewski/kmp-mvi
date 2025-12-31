@@ -23,3 +23,4 @@ rootProject.name = "kmp-mvi"
 include(":core")
 include(":test")
 include(":sample:composeApp")
+include(":viewmodel")

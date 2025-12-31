@@ -35,7 +35,7 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
         )
     }
 
-    protected val scope = container.scope
+    protected val scope: CoroutineScope = container.scope
 
     override val currentState: StateFlow<State> = container.currentState
 

@@ -1,10 +1,10 @@
 package com.jetbrains.kmpapp.screens.detail
 
+import com.adamczewski.kmp.viewmodel.MviViewModel
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import com.adamczewski.kmpmvi.mvi.android.MviViewModel
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
 import com.jetbrains.kmpapp.data.Song

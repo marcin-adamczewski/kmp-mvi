@@ -8,18 +8,15 @@ plugins {
 }
 
 kotlin {
+
     jvm()
     @Suppress("UnstableApiUsage")
     androidLibrary {
-        namespace = "com.adamczewski.kmpmvi"
+        namespace = "com.adamczewski.kmpmvi.viewmodel"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         withJava()
-        withHostTestBuilder {}.configure {}
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }
 
         compilations.configureEach {
             compilerOptions.configure {
@@ -47,7 +44,8 @@ kotlin {
         }
 
         commonMain.dependencies {
-            implementation(libs.coroutines.core)
+            api(project(":core"))
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
 
         commonTest.dependencies {
@@ -55,16 +53,5 @@ kotlin {
             implementation(libs.coroutines.test)
             implementation(project(":test"))
         }
-
-        jvmTest.dependencies {
-            implementation(libs.junit.api)
-            implementation(libs.junit.engine)
-            implementation(libs.junit.params)
-            implementation(libs.mockk.mockk)
-        }
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }

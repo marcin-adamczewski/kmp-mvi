@@ -44,8 +44,7 @@ class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect,
         }
     }
 
-    @PublishedApi
-    internal val scope: CoroutineScope = CoroutineScope(
+    val scope: CoroutineScope = CoroutineScope(
         scopeProvider().coroutineContext.let { context ->
             val exceptionHandler =
                 context[CoroutineExceptionHandler.Key] ?: settings.exceptionHandler

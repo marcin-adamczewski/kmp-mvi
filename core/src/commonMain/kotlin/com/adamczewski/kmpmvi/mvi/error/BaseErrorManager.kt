@@ -27,13 +27,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 
 public typealias ErrorManager = BaseErrorManager<UiError>
 
-public class BaseErrorManager<E: Error> {
+public class BaseErrorManager<E: MviError> {
     // Maximum of 3 errors are queued
     private val pendingErrors = Channel<E>(3, BufferOverflow.DROP_OLDEST)
     private val removeErrorSignal = Channel<Unit>(Channel.RENDEZVOUS)
 
     /**
-     * A flow of [Error]s to display in the UI, usually as snackbars. The flow will immediately
+     * A flow of [MviError]s to display in the UI, usually as snackbars. The flow will immediately
      * emit `null`, and will then emit errors sent via [addError]. Once duration seconds has elapsed,
      * or [removeCurrentError] is called (if before that) `null` will be emitted to remove
      * the current error.

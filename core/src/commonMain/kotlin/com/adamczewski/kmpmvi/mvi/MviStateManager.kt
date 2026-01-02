@@ -3,7 +3,7 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
-import com.adamczewski.kmpmvi.mvi.error.Error
+import com.adamczewski.kmpmvi.mvi.error.MviError
 import com.adamczewski.kmpmvi.mvi.error.observeError
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
@@ -141,7 +141,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
     protected suspend fun <T> withProgress(block: suspend () -> T): T =
         container.withProgress(block)
 
-    protected fun <E: Error>observeError(
+    protected fun <E: MviError>observeError(
         errorManager: BaseErrorManager<E>,
         block: suspend CoroutineScope.(E?) -> Unit,
     ) {

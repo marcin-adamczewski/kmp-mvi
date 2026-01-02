@@ -5,7 +5,7 @@ public class UiError(
     public val error: Throwable? = null,
     public val action: UiErrorAction? = null,
     public val isIndefinite: Boolean = false,
-) : Error
+) : MviError
 
 public interface UiErrorAction
 

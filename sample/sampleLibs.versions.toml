@@ -5,18 +5,15 @@ androidx-activityCompose = "1.10.1"
 androidx-ui-tooling = "1.7.8"
 androidx-viewmodel = "2.10.0"
 agp = "8.13.0"
-compose-multiplatform = "1.9.3"
 koin = "4.1.0"
 kotlin = "2.2.20"
 materialIconsCore = "1.7.3"
 navigationCompose = "2.9.0-beta03"
-lifecycleCompose = "2.9.1"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androidx-ui-tooling" }
@@ -24,5 +21,3 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }

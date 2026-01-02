@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(sampleLibs.plugins.androidApplication)
-    alias(sampleLibs.plugins.composeMultiplatform)
-    alias(sampleLibs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinxSerialization)
 }
 
@@ -63,7 +63,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
 
             implementation(sampleLibs.navigation.compose)
-            implementation(sampleLibs.lifecycle.runtime.compose)
+            implementation(libs.lifecycle.runtime.compose)
             implementation(sampleLibs.material.icons.core)
 
             implementation(sampleLibs.koin.core)

@@ -5,9 +5,8 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.vanniktech.mavenPublish)
-    // TODO unify
-    alias(sampleLibs.plugins.composeMultiplatform)
-    alias(sampleLibs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
@@ -50,8 +49,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core"))
             implementation(compose.runtime)
-            // TODO sample lib
-            implementation(sampleLibs.lifecycle.runtime.compose)
+            implementation(libs.lifecycle.runtime.compose)
         }
 
         commonTest.dependencies {

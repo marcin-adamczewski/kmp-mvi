@@ -1,5 +1,5 @@
 package com.adamczewski.kmpmvi.mvi.error
 
-interface Error {
-    val durationMs: Long
+public interface Error {
+    public val durationMs: Long
 }

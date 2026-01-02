@@ -1,3 +1,3 @@
 package com.adamczewski.kmpmvi.mvi.logger
 
-class NoOpLogger : BaseMviLogger()
+public class NoOpLogger : BaseMviLogger()

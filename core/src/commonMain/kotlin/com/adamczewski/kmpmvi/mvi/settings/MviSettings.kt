@@ -4,7 +4,7 @@ import com.adamczewski.kmpmvi.mvi.logger.MviLogger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 
-data class MviSettings(
+public data class MviSettings(
     val logger: () -> MviLogger,
     val effectsBufferSize: Int,
     val exceptionHandler: CoroutineExceptionHandler?,

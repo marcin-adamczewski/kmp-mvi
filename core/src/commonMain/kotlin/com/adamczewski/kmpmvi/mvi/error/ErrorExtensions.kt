@@ -4,7 +4,7 @@ import com.adamczewski.kmpmvi.mvi.BaseMviContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun <E: Error> BaseMviContainer<*, *, *, *>.observeError(
+public fun <E: Error> BaseMviContainer<*, *, *, *>.observeError(
     errorManager: BaseErrorManager<E>,
     block: suspend CoroutineScope.(E?) -> Unit,
 ) {

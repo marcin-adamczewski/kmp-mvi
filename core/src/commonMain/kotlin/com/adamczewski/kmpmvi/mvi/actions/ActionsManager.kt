@@ -18,16 +18,18 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
-class ActionsManager<Action : MviAction>(
+public class ActionsManager<Action : MviAction>(
     @PublishedApi internal val scope: CoroutineScope,
     private val actionsLock: CompletableDeferred<Unit>,
 ) {
     @PublishedApi
-    internal val collectedActions = mutableListOf<CompletableDeferred<Unit>>()
+    internal val collectedActions: MutableList<CompletableDeferred<Unit>> =
+        mutableListOf<CompletableDeferred<Unit>>()
     @PublishedApi
-    internal val actions = MutableSharedFlow<Action>(extraBufferCapacity = 5)
+    internal val actions: MutableSharedFlow<Action> =
+        MutableSharedFlow<Action>(extraBufferCapacity = 5)
 
-    fun submitAction(action: Action) {
+    public fun submitAction(action: Action) {
         scope.launch {
             actionsLock.await()
             collectedActions.awaitAll()
@@ -39,7 +41,7 @@ class ActionsManager<Action : MviAction>(
      * Main function for handling actions. You should always use this method directly or via
      * other actions handling functions.
      */
-    inline fun <reified T : Action> onActionFlow(
+    public inline fun <reified T : Action> onActionFlow(
         crossinline transformer: suspend Flow<T>.() -> Flow<*>,
     ) {
         val isCollected = CompletableDeferred(Unit)
@@ -63,25 +65,26 @@ class ActionsManager<Action : MviAction>(
         }
     }
 
-    inline fun <reified T : Action> onAction(
+    public inline fun <reified T : Action> onAction(
         crossinline block: suspend (T) -> Unit,
     ) {
         onActionFlow { flatMapMerge { flow { emit(block(it)) } } }
     }
 
-    inline fun <reified T : Action> onActionSingle(
+    public inline fun <reified T : Action> onActionSingle(
         crossinline block: suspend (T) -> Unit,
     ) {
         onActionFlow { take(1).map(block) }
     }
 
-    inline fun <reified T : Action> onActionFlowSingle(
+    public inline fun <reified T : Action> onActionFlowSingle(
         crossinline flow: suspend (T) -> Flow<*>,
     ) {
         onActionFlow<T> { take(1).flatMapLatest { flow(it) } }
     }
 
-    class ActionNotSubscribedException(actionClass: KClass<out MviAction>) : Throwable(
+    @PublishedApi
+    internal class ActionNotSubscribedException(actionClass: KClass<out MviAction>) : Throwable(
         message = "Action $actionClass flow was not collected. " +
                 "Make sure to collect it in " +
                 "the Flow receiver passed to onActionFlow"

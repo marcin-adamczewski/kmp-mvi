@@ -1,8 +1,8 @@
 package com.adamczewski.kmpmvi.mvi.logger
 
-interface LifecycleLogger {
-    fun onInit()
-    fun onSubscribe()
-    fun onUnsubscribe()
-    fun onClear()
+public interface LifecycleLogger {
+    public fun onInit()
+    public fun onSubscribe()
+    public fun onUnsubscribe()
+    public fun onClear()
 }

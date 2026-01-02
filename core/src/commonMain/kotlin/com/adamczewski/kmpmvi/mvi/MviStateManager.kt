@@ -18,16 +18,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, Nothing>
+public typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, Nothing>
 
-abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
+public abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
 ) : Closeable, StateComponent<Action, State, Effect> {
     private val closeables = mutableListOf(*closeables)
 
-    protected val container = with(settings ?: defaultSettings()) {
+    protected val container: BaseMviContainer<Action, State, Effect, Message> = with(settings ?: defaultSettings()) {
         BaseMviContainer<Action, State, Effect, Message>(
             initialState = initialState,
             scopeProvider = scopeProvider,
@@ -44,9 +44,9 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
 
     override val effects: EffectsHandler<Effect> = container.effects
 
-    val progress: ProgressManager = container.progress
+    public val progress: ProgressManager = container.progress
 
-    val messages: Flow<Message> = container.messenger.messages
+    public val messages: Flow<Message> = container.messenger.messages
 
     init {
         container.handleActions {
@@ -62,15 +62,15 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
     protected abstract fun ActionsManager<Action>.handleActions()
 
 
-    fun onInit(block: suspend () -> Unit) {
+    public fun onInit(block: suspend () -> Unit) {
         container.onInit(block)
     }
 
-    fun onSubscribe(block: suspend () -> Unit) {
+    public fun onSubscribe(block: suspend () -> Unit) {
         container.onSubscribe(block)
     }
 
-    fun onUnsubscribe(block: suspend () -> Unit) {
+    public fun onUnsubscribe(block: suspend () -> Unit) {
         container.onUnsubscribe(block)
     }
 
@@ -138,7 +138,7 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
         container.observeProgress(block)
     }
 
-    protected suspend fun <T> withProgress(block: suspend () -> T) =
+    protected suspend fun <T> withProgress(block: suspend () -> T): T =
         container.withProgress(block)
 
     protected fun <E: Error>observeError(
@@ -153,6 +153,3 @@ abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect 
     }
 }
 
-interface Closeable {
-    fun close()
-}

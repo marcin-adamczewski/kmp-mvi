@@ -25,9 +25,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 
-typealias ErrorManager = BaseErrorManager<UiError>
+public typealias ErrorManager = BaseErrorManager<UiError>
 
-class BaseErrorManager<E: Error> {
+public class BaseErrorManager<E: Error> {
     // Maximum of 3 errors are queued
     private val pendingErrors = Channel<E>(3, BufferOverflow.DROP_OLDEST)
     private val removeErrorSignal = Channel<Unit>(Channel.RENDEZVOUS)
@@ -38,7 +38,7 @@ class BaseErrorManager<E: Error> {
      * or [removeCurrentError] is called (if before that) `null` will be emitted to remove
      * the current error.
      */
-    val errors: Flow<E?> = flow {
+    public val errors: Flow<E?> = flow {
         emit(null)
 
         pendingErrors.receiveAsFlow().collect { error ->
@@ -58,11 +58,11 @@ class BaseErrorManager<E: Error> {
         }
     }
 
-    suspend fun addError(error: E) {
+    public suspend fun addError(error: E) {
         pendingErrors.send(error)
     }
 
-    suspend fun removeCurrentError() {
+    public suspend fun removeCurrentError() {
         removeErrorSignal.send(Unit)
     }
 }

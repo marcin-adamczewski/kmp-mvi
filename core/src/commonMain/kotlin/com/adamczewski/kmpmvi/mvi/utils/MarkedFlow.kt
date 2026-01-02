@@ -3,11 +3,11 @@ package com.adamczewski.kmpmvi.mvi.utils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 
-class MarkedFlow<T>(
+public class MarkedFlow<T>(
     private val delegate: Flow<T>,
     private val onCollect: () -> Unit = {}
 ) : Flow<T> {
-    var collected: Boolean = false
+    public var collected: Boolean = false
     override suspend fun collect(collector: FlowCollector<T>) {
         collected = true
         onCollect.invoke()

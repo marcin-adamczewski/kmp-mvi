@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-class ProgressManager : ProgressObservable {
+public class ProgressManager : ProgressObservable {
     // Initial value is -1 so we can easily filter it out as the initial state should be defined
     // in UI state.
     private val initialValue = -1
@@ -31,13 +31,13 @@ class ProgressManager : ProgressObservable {
             .distinctUntilChanged()
 
     // coercedAtLeast is used to be able to increment over an initial negative value
-    fun addProgress(id: String) {
+    public fun addProgress(id: String) {
         if (progressIds.add(id)) {
             progressState.update { it.coerceAtLeast(0) + 1 }
         }
     }
 
-    fun removeProgress(id: String) {
+    public fun removeProgress(id: String) {
         if (progressIds.remove(id)) {
             progressState.update { (it - 1).coerceAtLeast(0) }
         }
@@ -50,7 +50,7 @@ private fun generateId(): String = Uuid.random().toString()
  * Shows progress immediately on start, and hides on error or on the first value.
  * Other value events are ignored and won't decrease counter as we don't want
  */
-fun <T> Flow<T>.watchProgress(
+public fun <T> Flow<T>.watchProgress(
     manager: ProgressManager,
     id: String = generateId()
 ): Flow<T> {
@@ -63,7 +63,7 @@ fun <T> Flow<T>.watchProgress(
  * Shows progress immediately on start, and hides on error or on the first value.
  * Other value events are ignored and won't decrease counter as we don't want
  */
-fun <T> SharedFlow<T>.watchProgress(
+public fun <T> SharedFlow<T>.watchProgress(
     manager: ProgressManager,
     id: String = generateId()
 ): Flow<T> {
@@ -75,7 +75,7 @@ fun <T> SharedFlow<T>.watchProgress(
 /**
  * Shows progress immediately, and hides after block execution.
  */
-suspend fun <T> withProgress(
+public suspend fun <T> withProgress(
     manager: ProgressManager,
     id: String = generateId(),
     block: suspend () -> T,

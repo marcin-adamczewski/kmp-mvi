@@ -1,3 +1,3 @@
 package com.adamczewski.kmpmvi.mvi.model
 
-interface MviAction
+public interface MviAction

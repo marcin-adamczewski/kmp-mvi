@@ -1,3 +1,3 @@
 package com.adamczewski.kmpmvi.mvi.model
 
-interface MviMessage
+public interface MviMessage

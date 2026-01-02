@@ -1,5 +1,5 @@
 package com.adamczewski.kmpmvi.mvi.model
 
-interface MviEffect
+public interface MviEffect
 
-object NoEffects : MviEffect
+public object NoEffects : MviEffect

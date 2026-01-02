@@ -5,7 +5,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 
-open class BaseMviLogger : MviLogger {
+public open class BaseMviLogger : MviLogger {
     override fun onInitialState(state: MviState) {}
     override fun onState(state: MviState) {}
     override fun onEffect(effect: MviEffect) {}

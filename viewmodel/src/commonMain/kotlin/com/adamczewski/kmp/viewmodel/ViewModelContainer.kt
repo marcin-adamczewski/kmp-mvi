@@ -10,19 +10,19 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import kotlinx.coroutines.flow.StateFlow
 
-typealias ViewModelContainer<A, S, E> = BaseViewModelContainer<A, S, E, Nothing>
+public typealias ViewModelContainer<A, S, E> = BaseViewModelContainer<A, S, E, Nothing>
 
-open class BaseViewModelContainer<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
+public open class BaseViewModelContainer<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     private val container: BaseMviStateManager<Action, State, Effect, Message>,
 ) : ViewModel(AutoCloseable { container.close() }),
     StateComponent<Action, State, Effect> by container
 
-typealias SimpleViewModelContainer<A, S, E> = AbstractViewModelContainer<A, S, E, Nothing>
+public typealias SimpleViewModelContainer<A, S, E> = AbstractViewModelContainer<A, S, E, Nothing>
 
-abstract class AbstractViewModelContainer<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage> :
+public abstract class AbstractViewModelContainer<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage> :
     ViewModel(), StateComponent<Action, State, Effect> {
 
-    abstract val container: BaseMviStateManager<Action, State, Effect, Message>
+    public abstract val container: BaseMviStateManager<Action, State, Effect, Message>
 
     init {
         addCloseable(AutoCloseable { container.close() })

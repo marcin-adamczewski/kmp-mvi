@@ -24,9 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, Nothing>
+public typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, Nothing>
 
-abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
+public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -34,17 +34,18 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
 
     private val closeables = mutableListOf(*closeables)
 
-    protected val container = BaseMviContainer<Action, State, Effect, Message>(
-        scopeProvider = { viewModelScope },
-        initialState = initialState,
-        settings = settings ?: defaultSettings()
-    )
+    protected val container: BaseMviContainer<Action, State, Effect, Message> =
+        BaseMviContainer<Action, State, Effect, Message>(
+            scopeProvider = { viewModelScope },
+            initialState = initialState,
+            settings = settings ?: defaultSettings()
+        )
 
-    protected val scope = container.scope
+    protected val scope: CoroutineScope = container.scope
 
     /**
      * Override this method to handle actions.
-     * It's recommended to call only methods from provided [com.adamczewski.kmpmvi.mvi.actions.ActionsManager] in this method.
+     * It's recommended to call only methods from provided [ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
     protected abstract fun ActionsManager<Action>.handleActions()
@@ -56,9 +57,9 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
 
     override val effects: EffectsHandler<Effect> = container.effects
 
-    val progress: ProgressManager = container.progress
+    public val progress: ProgressManager = container.progress
 
-    val messages: Flow<Message> = container.messenger.messages
+    public val messages: Flow<Message> = container.messenger.messages
 
     init {
         container.handleActions {
@@ -66,15 +67,15 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
         }
     }
 
-    fun onInit(block: suspend () -> Unit) {
+    public fun onInit(block: suspend () -> Unit) {
         container.onInit(block)
     }
 
-    fun onSubscribe(block: suspend () -> Unit) {
+    public fun onSubscribe(block: suspend () -> Unit) {
         container.onSubscribe(block)
     }
 
-    fun onUnsubscribe(block: suspend () -> Unit) {
+    public fun onUnsubscribe(block: suspend () -> Unit) {
         container.onUnsubscribe(block)
     }
 
@@ -142,10 +143,10 @@ abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : M
         container.observeProgress(block)
     }
 
-    protected suspend fun <T> withProgress(block: suspend () -> T) =
+    protected suspend fun <T> withProgress(block: suspend () -> T): T =
         container.withProgress(block)
 
-    protected fun <E: Error> observeError(
+    protected fun <E : Error> observeError(
         errorManager: BaseErrorManager<E>,
         block: suspend CoroutineScope.(E?) -> Unit,
     ) {

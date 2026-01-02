@@ -5,7 +5,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 
-class DefaultMviLogger(val tag: String) : MviLogger {
+public class DefaultMviLogger(public val tag: String) : MviLogger {
     override fun onInitialState(state: MviState) {
         log("[Initial State] - $state")
     }

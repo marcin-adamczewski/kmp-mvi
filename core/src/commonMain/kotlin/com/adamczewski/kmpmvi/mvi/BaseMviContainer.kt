@@ -26,9 +26,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
-typealias MviContainer<A, S, E> = BaseMviContainer<A, S, E, Nothing>
+public typealias MviContainer<A, S, E> = BaseMviContainer<A, S, E, Nothing>
 
-class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
+public class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,
@@ -43,7 +43,7 @@ class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect,
         }
     }
 
-    val scope: CoroutineScope = CoroutineScope(
+    public val scope: CoroutineScope = CoroutineScope(
         scopeProvider().coroutineContext.let { context ->
             val exceptionHandler =
                 context[CoroutineExceptionHandler.Key] ?: settings.exceptionHandler
@@ -64,11 +64,11 @@ class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect,
 
     override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
 
-    val progress = ProgressManager()
+    public  val progress: ProgressManager = ProgressManager()
 
-    val subscribersCount: StateFlow<Int> = stateFlow.subscriptionCount
+    public val subscribersCount: StateFlow<Int> = stateFlow.subscriptionCount
 
-    val messenger = Messenger<Message>(scope)
+    public val messenger: Messenger<Message> = Messenger<Message>(scope)
 
     init {
         scope.launch {
@@ -76,28 +76,28 @@ class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect,
         }
     }
 
-    fun handleActions(block: ActionsManager<Action>.() -> Unit) {
+    public  fun handleActions(block: ActionsManager<Action>.() -> Unit) {
         actions.block()
         handleActionCalled.complete(Unit)
     }
 
-    fun onInit(block: suspend () -> Unit) {
+    public fun onInit(block: suspend () -> Unit) {
         lifecycleManager.onInit(block)
     }
 
-    fun onSubscribe(block: suspend () -> Unit) {
+    public fun onSubscribe(block: suspend () -> Unit) {
         lifecycleManager.onSubscribe(block)
     }
 
-    fun onUnsubscribe(block: suspend () -> Unit) {
+    public fun onUnsubscribe(block: suspend () -> Unit) {
         lifecycleManager.onUnsubscribe(block)
     }
 
-    fun setState(reducer: State.() -> State) {
+    public fun setState(reducer: State.() -> State) {
         stateFlow.update { currentValue -> reducer(currentValue) }
     }
 
-    suspend fun setEffect(
+    public suspend fun setEffect(
         requireConsumer: Boolean = false,
         reducer: suspend State.() -> Effects,
     ) {
@@ -111,7 +111,7 @@ class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect,
         actions.submitAction(action)
     }
 
-    fun observeProgress(
+    public fun observeProgress(
         progressObservable: ProgressObservable,
         block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
     ) {
@@ -122,16 +122,16 @@ class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect,
         }
     }
 
-    fun observeProgress(block: suspend CoroutineScope.(showProgress: Boolean) -> Unit) =
+    public fun observeProgress(block: suspend CoroutineScope.(showProgress: Boolean) -> Unit): Unit =
         observeProgress(progress, block)
 
-    suspend fun <T> withProgress(
+    public suspend fun <T> withProgress(
         block: suspend () -> T,
     ): T {
         return withProgress(manager = progress, block = block)
     }
 
-    fun clear() {
+    public fun clear() {
         logger.onClear()
         scope.cancel()
     }

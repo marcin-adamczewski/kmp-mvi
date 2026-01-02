@@ -1,8 +1,8 @@
 package com.adamczewski.kmpmvi.mvi.model
 
-interface MviState {
+public interface MviState {
     override fun equals(other: Any?): Boolean
     override fun hashCode(): Int
 }
 
-data object NoState : MviState
+public data object NoState : MviState

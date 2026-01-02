@@ -14,7 +14,7 @@ import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.decrementAndFetch
 import kotlin.concurrent.atomics.incrementAndFetch
 
-class EffectsHandler<T : MviEffect>(
+public class EffectsHandler<T : MviEffect>(
     @PublishedApi internal val unconsumedEffectsFlow: Flow<UniqueEffect<T>>,
     @PublishedApi internal val consume: suspend (UniqueEffect<T>) -> Unit,
 ) {
@@ -23,9 +23,9 @@ class EffectsHandler<T : MviEffect>(
     @PublishedApi
     internal var activeSingleEffectConsumers: Set<KClass<out T>> =
         AtomicMutableSet<KClass<out T>>()
-    val observeEffects: Flow<T> = unconsumedEffectsFlow.map { it.effect }
+    public val observeEffects: Flow<T> = unconsumedEffectsFlow.map { it.effect }
 
-    suspend fun consume(
+    public suspend fun consume(
         skipConsuming: (T) -> Boolean = { false },
         handler: suspend (T) -> Unit,
     ) {
@@ -35,7 +35,7 @@ class EffectsHandler<T : MviEffect>(
         ).collect {}
     }
 
-    fun consumeFlow(
+    public fun consumeFlow(
         skipConsuming: (T) -> Boolean = { false },
         handler: suspend (T) -> Unit,
     ): Flow<T> {
@@ -52,7 +52,7 @@ class EffectsHandler<T : MviEffect>(
             }
     }
 
-    inline fun <reified B : T> consumeEffectFlow(
+    public inline fun <reified B : T> consumeEffectFlow(
         noinline handler: suspend (B) -> Unit,
     ): Flow<B> {
         return unconsumedEffectsFlow
@@ -71,7 +71,7 @@ class EffectsHandler<T : MviEffect>(
      * consumers for this effect type using this function, so using it with setEffectIfActive
      * is not recommended.
      */
-    inline fun <reified B> consumeBaseEffectFlow(
+    public inline fun <reified B> consumeBaseEffectFlow(
         noinline handler: suspend (B) -> Unit,
     ): Flow<B> {
         return unconsumedEffectsFlow

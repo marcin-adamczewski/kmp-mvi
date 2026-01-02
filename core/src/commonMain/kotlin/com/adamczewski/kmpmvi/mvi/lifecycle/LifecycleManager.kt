@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 
-class LifecycleManager(
+public class LifecycleManager(
     stateSubscriptionsCount: StateFlow<Int>,
     private val scope: CoroutineScope,
     private val logger: LifecycleLogger
@@ -24,7 +24,7 @@ class LifecycleManager(
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    fun onInit(block: suspend () -> Unit) {
+    public fun onInit(block: suspend () -> Unit) {
         isStateSubscribed
             .filter { it == true }
             .take(1)
@@ -36,7 +36,7 @@ class LifecycleManager(
     }
 
 
-    fun onSubscribe(block: suspend () -> Unit) {
+    public fun onSubscribe(block: suspend () -> Unit) {
         isStateSubscribed
             .filter { it == true }
             .onEach {
@@ -46,7 +46,7 @@ class LifecycleManager(
             .launchIn(scope)
     }
 
-    fun onUnsubscribe(block: suspend () -> Unit) {
+    public fun onUnsubscribe(block: suspend () -> Unit) {
         isStateSubscribed
             .filter { it == false }
             .onEach {

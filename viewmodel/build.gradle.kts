@@ -8,6 +8,7 @@ plugins {
 }
 
 kotlin {
+    explicitApi()
 
     jvm()
     @Suppress("UnstableApiUsage")

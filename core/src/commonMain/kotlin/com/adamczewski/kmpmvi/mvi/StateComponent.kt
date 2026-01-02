@@ -5,8 +5,8 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import kotlinx.coroutines.flow.StateFlow
 
-interface StateComponent<Action : MviAction, State, Effects : MviEffect> {
-    val currentState: StateFlow<State>
-    val effects: EffectsHandler<Effects>
-    fun submitAction(action: Action)
+public interface StateComponent<Action : MviAction, State, Effects : MviEffect> {
+    public val currentState: StateFlow<State>
+    public val effects: EffectsHandler<Effects>
+    public fun submitAction(action: Action)
 }

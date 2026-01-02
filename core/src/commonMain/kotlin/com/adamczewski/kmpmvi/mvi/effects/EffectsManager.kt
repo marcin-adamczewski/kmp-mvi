@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package com.adamczewski.kmpmvi.mvi.effects
 
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
@@ -8,9 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-class EffectsManager<T : MviEffect>(
+public class EffectsManager<T : MviEffect>(
     bufferSize: Int,
     idsLruCacheSize: Int = EFFECT_IDS_LRU_CACHE_SIZE
 ) {
@@ -24,12 +21,12 @@ class EffectsManager<T : MviEffect>(
         // (e.g. in UI), not effects that were emitted.
         .filter { wrapper -> !consumedEffectIds.contains(wrapper.id) }
 
-    val effectsHandler = EffectsHandler(
+    public val effectsHandler: EffectsHandler<T> = EffectsHandler(
         unconsumedEffectsFlow = unconsumedEffects,
         consume = { effect -> consumeEffect(effect) }
     )
 
-    suspend fun setEffect(effect: T, requireConsumer: Boolean = false) {
+    public suspend fun setEffect(effect: T, requireConsumer: Boolean = false) {
         if (!requireConsumer || effectsHandler.isEffectConsumerActive(effect)) {
             effectsFlow.emit(UniqueEffect(effect))
         }
@@ -43,8 +40,3 @@ class EffectsManager<T : MviEffect>(
         private const val EFFECT_IDS_LRU_CACHE_SIZE = 30
     }
 }
-
-class UniqueEffect<T : MviEffect>(
-    val effect: T,
-    val id: String = Uuid.random().toString(),
-)

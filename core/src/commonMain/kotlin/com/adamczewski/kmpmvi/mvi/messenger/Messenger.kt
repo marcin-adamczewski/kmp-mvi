@@ -14,19 +14,19 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
-class Messenger<M: MviMessage>(
+public class Messenger<M: MviMessage>(
     private val scope: CoroutineScope,
 ) {
     private val messagesFlow = MutableSharedFlow<M>(extraBufferCapacity = 10)
-    val messages: SharedFlow<M> = messagesFlow.asSharedFlow()
+    public val messages: SharedFlow<M> = messagesFlow.asSharedFlow()
 
-    fun setMessage(message: M) {
+    public fun setMessage(message: M) {
         scope.launch {
             messagesFlow.emit(message)
         }
     }
 
-    fun <M: MviMessage> onMessageFlow(
+    public fun <M: MviMessage> onMessageFlow(
         klass: KClass<M>,
         child: BaseMviStateManager<*, *, *, in M>,
         transformer: suspend Flow<M>.() -> Flow<*>,
@@ -39,7 +39,7 @@ class Messenger<M: MviMessage>(
         }
     }
 
-    fun <M: MviMessage> onMessage(
+    public fun <M: MviMessage> onMessage(
         klass: KClass<M>,
         child: BaseMviStateManager<*, *, *, in M>,
         block: suspend (M) -> Unit,

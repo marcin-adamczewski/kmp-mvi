@@ -15,9 +15,9 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 
-const val TEST_DELAY = 2L
+public const val TEST_DELAY: Long = 2L
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffect(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffect(
     stateComponent: VM,
     actionToSubmit: A,
     expectedEffect: E,
@@ -29,7 +29,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     )
 }
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffects(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffects(
     stateComponent: VM,
     actionToSubmit: A,
     vararg expectedEffects: E,
@@ -41,7 +41,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     )
 }
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffect(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffect(
     stateComponent: VM,
     actionBlock: suspend StateManagerFlowTurbine<E, A>.() -> Unit,
     expectedEffect: E,
@@ -56,7 +56,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     }
 }
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffects(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThenEffects(
     stateComponent: VM,
     actionBlock: suspend StateManagerFlowTurbine<E, A>.() -> Unit,
     vararg expectedEffects: E,
@@ -73,7 +73,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     }
 }
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThen(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThen(
     stateComponent: VM,
     actionToSubmit: A,
     assertBlock: () -> Unit,
@@ -85,7 +85,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     )
 }
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThen(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThen(
     stateComponent: VM,
     vararg actionToSubmit: A,
     assertBlock: () -> Unit,
@@ -97,7 +97,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     )
 }
 
-suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThen(
+public suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestScope.whenActionThen(
     stateComponent: VM,
     actionBlock: (StateManagerFlowTurbine<E, A>.() -> Unit),
     assertBlock: () -> Unit,
@@ -113,7 +113,7 @@ suspend fun <A : MviAction, E : MviEffect, VM : StateComponent<A, *, E>> TestSco
     }
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenTextChangedThenUpdateState(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenTextChangedThenUpdateState(
     stateComponent: VM,
     actionToSubmit: (String) -> A,
     stateFieldToAssert: (S) -> String?,
@@ -129,7 +129,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenTextC
     }
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenCheckboxCheckedThenUpdateState(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenCheckboxCheckedThenUpdateState(
     stateComponent: VM,
     actionToSubmit: (Boolean) -> A,
     stateFieldToAssert: (S) -> Boolean,
@@ -148,7 +148,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenCheck
     }
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowProgress(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowProgress(
     stateComponent: VM,
     stateFieldToAssert: (S) -> Boolean,
     beforeActionBlock: (StateManagerFlowTurbine<S, A>.() -> Unit)? = null,
@@ -170,7 +170,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActio
     }
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenHideProgress(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenHideProgress(
     stateComponent: VM,
     stateFieldToAssert: (S) -> Boolean,
     actionToSubmit: A,
@@ -184,7 +184,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActio
     }
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowError(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     actionToSubmit: A,
@@ -200,7 +200,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActio
     )
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowError(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     actionToSubmit: A,
@@ -215,7 +215,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActio
         errorTypeAssertion = { it == expectedError })
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenInitThenShowError(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenInitThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     fetchDelay: Long = TEST_DELAY,
@@ -231,7 +231,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenInitT
     )
 }
 
-suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowError(
+public suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActionThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     actionBlock: suspend StateManagerFlowTurbine<S, A>.() -> Unit,
@@ -254,7 +254,7 @@ suspend fun <A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.whenActio
     }
 }
 
-suspend fun <T, A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.testItemToggled(
+public suspend fun <T, A : MviAction, S, VM : StateComponent<A, S, *>> TestScope.testItemToggled(
     stateComponent: VM,
     itemsCollection: (S) -> Set<T>,
     toggledItem: T,

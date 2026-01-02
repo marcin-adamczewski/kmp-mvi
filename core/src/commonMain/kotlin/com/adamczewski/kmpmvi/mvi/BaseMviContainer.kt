@@ -32,7 +32,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,
-) : StateComponent<Action, State, Effects> {
+) : MviComponent<Action, State, Effects> {
     private val handleActionCalled = CompletableDeferred<Unit>()
 
     private val logger: MviLogger by lazy {

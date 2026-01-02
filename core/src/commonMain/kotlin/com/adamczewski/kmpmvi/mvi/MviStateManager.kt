@@ -24,7 +24,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
-) : Closeable, StateComponent<Action, State, Effect> {
+) : Closeable, MviComponent<Action, State, Effect> {
     private val closeables = mutableListOf(*closeables)
 
     protected val container: BaseMviContainer<Action, State, Effect, Message> = with(settings ?: defaultSettings()) {

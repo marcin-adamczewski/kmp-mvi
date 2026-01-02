@@ -13,7 +13,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
-import com.adamczewski.kmpmvi.mvi.StateComponent
+import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.utils.defaultSettings
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
@@ -30,7 +30,7 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
-) : ViewModel(), StateComponent<Action, State, Effect> {
+) : ViewModel(), MviComponent<Action, State, Effect> {
 
     private val closeables = mutableListOf(*closeables)
 

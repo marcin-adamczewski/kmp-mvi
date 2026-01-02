@@ -37,10 +37,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
+import com.adamczewski.kmp.compose.handleEffects
 import com.jetbrains.kmpapp.data.Song
 import com.jetbrains.kmpapp.screens.EmptyScreenContent
+import com.zumba.consumerapp.ui.utils.collectAsStateWithLifecycle
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -49,7 +49,7 @@ fun SongsScreen(
     navigateToDetails: (songId: String) -> Unit
 ) {
     val viewModel = koinViewModel<SongsViewModel>()
-    val state by viewModel.currentState.collectAsStateWithLifecycle()
+    val state by viewModel.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -60,10 +60,11 @@ fun SongsScreen(
         SongsScreen(state, viewModel::submitAction)
     }
 
-    HandleEffects(
-        viewModel.effects,
-        navigateToDetails
-    )
+    viewModel.handleEffects { effect ->
+        when (effect) {
+            is SongsEffect.OpenSongDetails -> navigateToDetails(effect.songId)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.submitAction(SongsAction.Init)
@@ -73,21 +74,8 @@ fun SongsScreen(
         state.error?.let {
             snackbarHostState.showSnackbar(
                 message = "Something went wrong",
-                duration = SnackbarDuration.Long)
-        }
-    }
-}
-
-@Composable
-private fun HandleEffects(
-    effectsHandler: EffectsHandler<SongsEffect>,
-    navigateToDetails: (songId: String) -> Unit
-) {
-    LaunchedEffect(Unit) {
-        effectsHandler.consume { effect ->
-            when (effect) {
-                is SongsEffect.OpenSongDetails -> navigateToDetails(effect.songId)
-            }
+                duration = SnackbarDuration.Long
+            )
         }
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jetbrains.kmpapp.data.Song
+import com.zumba.consumerapp.ui.utils.collectAsStateWithLifecycle
 import kmp_mvi.sample.composeapp.generated.resources.Res
 import kmp_mvi.sample.composeapp.generated.resources.back
 import kmp_mvi.sample.composeapp.generated.resources.label_artist
@@ -44,7 +45,7 @@ fun SongDetailsScreen(
     navigateBack: () -> Unit,
 ) {
     val viewModel = koinViewModel<SongDetailViewModel>()
-    val state: SongDetailState by viewModel.currentState.collectAsStateWithLifecycle()
+    val state: SongDetailState by viewModel.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.submitAction(SongDetailsAction.Init(songId))

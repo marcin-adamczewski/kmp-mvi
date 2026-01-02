@@ -54,6 +54,7 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(project(":viewmodel"))
+            implementation(project(":compose"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)

@@ -10,5 +10,5 @@ public interface MviLogger : LifecycleLogger {
     public fun onState(state: MviState)
     public fun onEffect(effect: MviEffect)
     public fun onAction(action: MviAction)
-    public fun onMessage(action: MviMessage)
+    public fun onMessage(message: MviMessage)
 }

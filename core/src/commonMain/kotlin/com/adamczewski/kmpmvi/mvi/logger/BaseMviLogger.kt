@@ -10,7 +10,7 @@ public open class BaseMviLogger : MviLogger {
     override fun onState(state: MviState) {}
     override fun onEffect(effect: MviEffect) {}
     override fun onAction(action: MviAction) {}
-    override fun onMessage(action: MviMessage) {}
+    override fun onMessage(message: MviMessage) {}
     override fun onInit() {}
     override fun onSubscribe() {}
     override fun onUnsubscribe() {}

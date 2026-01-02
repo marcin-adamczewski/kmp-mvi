@@ -25,8 +25,8 @@ public class DefaultMviLogger(
         log("[Action] - $action")
     }
 
-    override fun onMessage(action: MviMessage) {
-        log("[Message] - $action")
+    override fun onMessage(message: MviMessage) {
+        log("[Message] - $message")
     }
 
     override fun onInit() {

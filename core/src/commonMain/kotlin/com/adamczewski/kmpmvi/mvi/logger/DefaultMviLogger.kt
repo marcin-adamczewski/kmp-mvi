@@ -5,7 +5,10 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 
-public class DefaultMviLogger(public val tag: String) : MviLogger {
+public class DefaultMviLogger(
+    public val tag: String,
+    public val printer: Printer = DefaultPrinter()
+) : MviLogger {
     override fun onInitialState(state: MviState) {
         log("[Initial State] - $state")
     }
@@ -42,7 +45,15 @@ public class DefaultMviLogger(public val tag: String) : MviLogger {
         log("[Lifecycle] - onClear")
     }
 
-    private fun log(message: String) = println(
-        "MVI $tag: $message"
-    )
+    private fun log(message: String) = printer.print(tag, message)
+}
+
+public fun interface Printer {
+    public fun print(tag: String, message: String)
+}
+
+public class DefaultPrinter : Printer {
+    override fun print(tag: String, message: String) {
+        println("MVI $tag: $message")
+    }
 }

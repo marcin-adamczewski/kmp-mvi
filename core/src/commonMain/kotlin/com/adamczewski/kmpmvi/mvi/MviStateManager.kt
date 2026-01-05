@@ -27,13 +27,14 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
 ) : Closeable, MviComponent<Action, State, Effect> {
     private val closeables = mutableListOf(*closeables)
 
-    protected val container: BaseMviContainer<Action, State, Effect, Message> = with(settings ?: defaultSettings()) {
-        BaseMviContainer<Action, State, Effect, Message>(
-            initialState = initialState,
-            scopeProvider = scopeProvider,
-            settings = this
-        )
-    }
+    protected val container: BaseMviContainer<Action, State, Effect, Message> =
+        with(settings ?: settings()) {
+            BaseMviContainer<Action, State, Effect, Message>(
+                initialState = initialState,
+                scopeProvider = scopeProvider,
+                settings = this
+            )
+        }
 
     protected val scope: CoroutineScope = container.scope
 
@@ -61,6 +62,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
      */
     protected abstract fun ActionsManager<Action>.handleActions()
 
+    open protected fun settings(): MviSettings = defaultSettings()
 
     public fun onInit(block: suspend () -> Unit) {
         container.onInit(block)

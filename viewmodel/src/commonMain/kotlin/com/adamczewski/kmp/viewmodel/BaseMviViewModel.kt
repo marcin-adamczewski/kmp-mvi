@@ -38,17 +38,10 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
         BaseMviContainer<Action, State, Effect, Message>(
             scopeProvider = { viewModelScope },
             initialState = initialState,
-            settings = settings ?: defaultSettings()
+            settings = settings ?: settings()
         )
 
     protected val scope: CoroutineScope = container.scope
-
-    /**
-     * Override this method to handle actions.
-     * It's recommended to call only methods from provided [ActionsManager] in this method.
-     * Other methods should be called within actions handling functions.
-     */
-    protected abstract fun ActionsManager<Action>.handleActions()
 
     override val currentState: StateFlow<State> = container.currentState
 
@@ -65,6 +58,17 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
         container.handleActions {
             handleActions()
         }
+    }
+
+    /**
+     * Override this method to handle actions.
+     * It's recommended to call only methods from provided [ActionsManager] in this method.
+     * Other methods should be called within actions handling functions.
+     */
+    protected abstract fun ActionsManager<Action>.handleActions()
+
+    open protected fun settings(): MviSettings {
+        return defaultSettings()
     }
 
     public fun onInit(block: suspend () -> Unit) {

@@ -12,10 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.adamczewski.kmpmvi.mvi.MviConfig
-import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
-import com.adamczewski.kmpmvi.mvi.settings.DefaultMviSettingsProvider
-import com.adamczewski.kmpmvi.mvi.settings.MviSettingProviderBuilder
-import com.adamczewski.kmpmvi.mvi.settings.MviSettingsProvider
+import com.adamczewski.kmpmvi.mvi.settings.buildMviSettingsProvider
 import com.jetbrains.kmpapp.screens.detail.SongDetailsScreen
 import com.jetbrains.kmpapp.screens.list.SongsScreen
 import kotlinx.serialization.Serializable
@@ -29,15 +26,12 @@ data class SongDetailsDestination(val songId: String)
 @Composable
 fun App() {
     MviConfig.apply {
-        // Customise default settings. You can use DefaultMviSettingsProvider and override
-        // any default property passing it to the .copy() function.
-        settingsProvider = MviSettingProviderBuilder.withDefaultSettings { settings, logTag, klass ->
-            settings.copy(
-                // In a production app it could be something like
-                // isLoggerEnabled = BuildConfigUtils.isDebugBuild()
-                isLoggerEnabled = true,
-                effectsBufferSize = 20
-            )
+        // Customise default settings.
+        settingsProvider = buildMviSettingsProvider { tag, klass ->
+            // In a production app it could be something like
+            // isLoggerEnabled = BuildConfigUtils.isDebugBuild()
+            isLoggerEnabled = true
+            effectsBufferSize = 20
         }
     }
 

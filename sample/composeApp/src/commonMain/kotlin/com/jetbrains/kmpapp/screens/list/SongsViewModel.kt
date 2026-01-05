@@ -9,6 +9,8 @@ import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
 import com.adamczewski.kmpmvi.mvi.progress.watchProgress
+import com.adamczewski.kmpmvi.mvi.settings.MviSettings
+import com.adamczewski.kmpmvi.mvi.utils.buildSettings
 import com.jetbrains.kmpapp.data.MusicRepository
 import com.jetbrains.kmpapp.data.Song
 import com.jetbrains.kmpapp.screens.list.SongsAction.Init

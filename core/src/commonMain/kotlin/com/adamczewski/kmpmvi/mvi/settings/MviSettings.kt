@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 
 public data class MviSettings(
+    val isLoggerEnabled: Boolean,
     val logger: () -> MviLogger,
     val effectsBufferSize: Int,
     val exceptionHandler: CoroutineExceptionHandler?,

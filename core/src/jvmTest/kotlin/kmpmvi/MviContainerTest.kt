@@ -56,6 +56,7 @@ class MviContainerTest {
             scopeProvider = scopeProvider,
             initialState = initialState,
             settings = MviSettings(
+                isLoggerEnabled = true,
                 logger = { DefaultMviLogger("MviContainerTest") },
                 effectsBufferSize = effectsBufferSize,
                 exceptionHandler = exceptionHandler,

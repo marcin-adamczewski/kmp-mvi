@@ -9,6 +9,7 @@ public object DefaultMviSettingsProvider : MviSettingsProvider {
         tag: String,
         klass: KClass<out Any>
     ): MviSettings = MviSettings(
+        isLoggerEnabled = true,
         logger = { DefaultMviLogger(tag = tag) },
         effectsBufferSize = 10,
         exceptionHandler = null,

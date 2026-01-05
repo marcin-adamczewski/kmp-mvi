@@ -4,6 +4,5 @@ import com.adamczewski.kmpmvi.mvi.settings.DefaultMviSettingsProvider
 import com.adamczewski.kmpmvi.mvi.settings.MviSettingsProvider
 
 public object MviConfig {
-    public var canLog: Boolean = true
     public var settingsProvider: MviSettingsProvider = DefaultMviSettingsProvider
 }

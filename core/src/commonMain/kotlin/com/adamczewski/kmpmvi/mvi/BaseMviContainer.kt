@@ -36,7 +36,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     private val handleActionCalled = CompletableDeferred<Unit>()
 
     private val logger: MviLogger by lazy {
-        if (MviConfig.canLog) {
+        if (settings.isLoggerEnabled) {
             settings.logger()
         } else {
             NoOpLogger()

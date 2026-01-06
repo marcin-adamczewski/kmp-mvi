@@ -8,4 +8,4 @@ import com.adamczewski.kmpmvi.mvi.model.MviState
 
 @Composable
 public fun <S : MviState> MviComponent<*, S, *>.collectAsStateWithLifecycle(): State<S> =
-    currentState.collectAsStateWithLifecycle()
+    state.collectAsStateWithLifecycle()

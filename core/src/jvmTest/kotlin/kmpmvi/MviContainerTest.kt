@@ -515,6 +515,12 @@ class MviContainerTest {
 
     @Nested
     inner class Lifecycle {
+        @Test
+        fun `verify state has initially zero subscribers`() = runTest {
+            createSut().subscribersCount.test {
+                assertEquals(0, awaitItem())
+            }
+        }
 
         @Test
         fun `when first state subscriber, then call onInit`() = runTest {
@@ -527,17 +533,10 @@ class MviContainerTest {
             }
 
             assertFalse(called)
-            sut.currentState.launchIn(backgroundScope)
+            sut.state.launchIn(backgroundScope)
 
             job.join()
             assertTrue(called)
-        }
-
-        @Test
-        fun `verify state has initially zero subscribers`() = runTest {
-            createSut().subscribersCount.test {
-                assertEquals(1, awaitItem())
-            }
         }
 
         @Test
@@ -562,7 +561,7 @@ class MviContainerTest {
                 assertEquals(0, unsubscribeCount)
 
                 val job1 = launch {
-                    sut.currentState.collect { }
+                    sut.state.collect {}
                 }
                 advanceUntilIdle()
 
@@ -570,7 +569,7 @@ class MviContainerTest {
                 assertEquals(0, unsubscribeCount)
 
                 val job2 = launch {
-                    sut.currentState.collect { }
+                    sut.state.collect { }
                 }
                 advanceUntilIdle()
 
@@ -590,7 +589,7 @@ class MviContainerTest {
                 assertEquals(1, unsubscribeCount)
 
                 val job3 = launch {
-                    sut.currentState.collect { }
+                    sut.state.collect { }
                 }
                 advanceUntilIdle()
 
@@ -604,6 +603,82 @@ class MviContainerTest {
                 assertEquals(2, unsubscribeCount)
             }
 
+        @Test
+        fun `when subscribed to non-lifecycle state, then do not call callbacks and do not increase subscribers count`() =
+            runTest {
+                val sut = createSut()
+                var subscribeCount = 0
+                var unsubscribeCount = 0
+
+                launch {
+                    sut.onSubscribe {
+                        subscribeCount++
+                    }
+
+                    sut.onUnsubscribe {
+                        unsubscribeCount++
+                    }
+                }
+                advanceUntilIdle()
+
+                var collected = false
+                val job1 = launch {
+                    sut.observableState.collect {
+                        collected = true
+                    }
+                }
+                advanceUntilIdle()
+
+                assertTrue(collected)
+                sut.subscribersCount.test {
+                    assertEquals(0, awaitItem())
+                    assertEquals(0, subscribeCount)
+                    assertEquals(0, unsubscribeCount)
+                    job1.cancel()
+                }
+            }
+
+        @Test
+        fun `given state subscribed, when subscribed to non-lifecycle state, then do not increase subscribers count`() =
+            runTest {
+                val sut = createSut()
+                var subscribeCount = 0
+                var unsubscribeCount = 0
+
+                launch {
+                    sut.onSubscribe {
+                        subscribeCount++
+                    }
+
+                    sut.onUnsubscribe {
+                        unsubscribeCount++
+                    }
+                }
+                advanceUntilIdle()
+                val job1 = launch {
+                    sut.state.collect {}
+                }
+                advanceUntilIdle()
+
+                var collected = false
+                val job2 = launch {
+                    sut.observableState.collect {
+                        collected = true
+                    }
+                }
+                advanceUntilIdle()
+
+                assertTrue(collected)
+                sut.subscribersCount.test {
+                    assertEquals(1, awaitItem())
+                    assertEquals(1, subscribeCount)
+                    assertEquals(0, unsubscribeCount)
+                    job1.cancel()
+                    job2.cancel()
+                    assertEquals(0, awaitItem())
+                    assertEquals(1, unsubscribeCount)
+                }
+            }
     }
 
     @Test

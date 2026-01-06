@@ -15,14 +15,13 @@ import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.progress.withProgress
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
+import com.adamczewski.kmpmvi.mvi.state.StateManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -52,21 +51,19 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
         }
     )
 
-    private val stateFlow = MutableStateFlow(initialState)
+    private val stateManager: StateManager<State> = StateManager(initialState)
+    override val state: StateFlow<State> = stateManager.subscriberCountState
+    override val observableState: StateFlow<State> = stateManager.state
+    public val subscribersCount: StateFlow<Int> = stateManager.subscribersCount
 
     private val effectsManager = EffectsManager<Effects>(settings.effectsBufferSize)
+    override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
 
     private val actions = ActionsManager<Action>(scope, handleActionCalled)
 
-    private val lifecycleManager = LifecycleManager(stateFlow.subscriptionCount, scope, logger)
+    private val lifecycleManager = LifecycleManager(subscribersCount, scope, logger)
 
-    override val currentState: StateFlow<State> = stateFlow
-
-    override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
-
-    public  val progress: ProgressManager = ProgressManager()
-
-    public val subscribersCount: StateFlow<Int> = stateFlow.subscriptionCount
+    public val progress: ProgressManager = ProgressManager()
 
     public val messenger: Messenger<Message> = Messenger<Message>(scope)
 
@@ -94,7 +91,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     }
 
     public fun setState(reducer: State.() -> State) {
-        stateFlow.update { currentValue -> reducer(currentValue) }
+        stateManager.setState(reducer)
     }
 
     public suspend fun setEffect(
@@ -103,7 +100,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     ) {
         effectsManager.setEffect(
             requireConsumer = requireConsumer,
-            effect = reducer(stateFlow.value)
+            effect = reducer(stateManager.stateValue)
         )
     }
 
@@ -140,7 +137,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
         logger.onInitialState(initialState)
 
         scope.launch {
-            stateFlow
+            observableState
                 .filter { it !== initialState }
                 .collect {
                     logger.onState(it)

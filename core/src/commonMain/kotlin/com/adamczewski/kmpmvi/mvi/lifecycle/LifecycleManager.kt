@@ -19,8 +19,8 @@ public class LifecycleManager(
     private val logger: LifecycleLogger
 ) {
     private val isStateSubscribed: StateFlow<Boolean?> = stateSubscriptionsCount
-        .drop(2) // We're not interested in initial 0 value to not call onUnsubscribe initially, as well for initial logger subscriber
-        .map { it >= MIN_SUBSCRIBERS_COUNT }
+        .drop(1) // We're not interested in initial 0 value to not call onUnsubscribe initially
+        .map { it > 0 }
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -54,10 +54,5 @@ public class LifecycleManager(
                 block()
             }
             .launchIn(scope)
-    }
-
-    private companion object {
-        // One subscriber is for a logger
-        private const val MIN_SUBSCRIBERS_COUNT = 2
     }
 }

@@ -8,6 +8,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.model.NoState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain

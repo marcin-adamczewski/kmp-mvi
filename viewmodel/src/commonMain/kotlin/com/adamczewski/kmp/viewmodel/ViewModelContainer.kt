@@ -8,6 +8,7 @@ import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 public typealias ViewModelContainer<A, S, E> = BaseViewModelContainer<A, S, E, Nothing>
@@ -28,8 +29,11 @@ public abstract class AbstractViewModelContainer<Action : MviAction, State : Mvi
         addCloseable(AutoCloseable { container.close() })
     }
 
-    override val currentState: StateFlow<State>
-        get() = container.currentState
+    override val state: StateFlow<State>
+        get() = container.state
+
+    override val observableState: Flow<State>
+        get() = container.observableState
 
     override val effects: EffectsHandler<Effect>
         get() = container.effects

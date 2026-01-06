@@ -24,6 +24,10 @@ public class LifecycleManager(
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, null)
 
+    public val lifecycle: StateFlow<MviLifecycle> = isStateSubscribed
+        .map { if (it == true) MviLifecycle.SUBSCRIBED else MviLifecycle.UNSUBSCRIBED }
+        .stateIn(scope, SharingStarted.Eagerly, MviLifecycle.IDLE)
+
     public fun onInit(block: suspend () -> Unit) {
         isStateSubscribed
             .filter { it == true }
@@ -34,7 +38,6 @@ public class LifecycleManager(
             }
             .launchIn(scope)
     }
-
 
     public fun onSubscribe(block: suspend () -> Unit) {
         isStateSubscribed
@@ -55,4 +58,8 @@ public class LifecycleManager(
             }
             .launchIn(scope)
     }
+}
+
+public enum class MviLifecycle {
+    IDLE, SUBSCRIBED, UNSUBSCRIBED
 }

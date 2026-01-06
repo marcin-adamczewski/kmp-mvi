@@ -32,7 +32,7 @@ public abstract class AbstractViewModelContainer<Action : MviAction, State : Mvi
     override val state: StateFlow<State>
         get() = container.state
 
-    override val observableState: Flow<State>
+    override val observableState: StateFlow<State>
         get() = container.observableState
 
     override val effects: EffectsHandler<Effect>

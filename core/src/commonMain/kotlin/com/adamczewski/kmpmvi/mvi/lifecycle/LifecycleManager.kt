@@ -4,6 +4,7 @@ import com.adamczewski.kmpmvi.mvi.logger.LifecycleLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -18,45 +19,46 @@ public class LifecycleManager(
     private val scope: CoroutineScope,
     private val logger: LifecycleLogger
 ) {
-    private val isStateSubscribed: StateFlow<Boolean?> = stateSubscriptionsCount
+    public val lifecycle: StateFlow<MviLifecycle> = stateSubscriptionsCount
         .drop(1) // We're not interested in initial 0 value to not call onUnsubscribe initially
-        .map { it > 0 }
-        .distinctUntilChanged()
-        .stateIn(scope, SharingStarted.Eagerly, null)
-
-    public val lifecycle: StateFlow<MviLifecycle> = isStateSubscribed
-        .map { if (it == true) MviLifecycle.SUBSCRIBED else MviLifecycle.UNSUBSCRIBED }
+        .map { subscriptionsCount ->
+            if (subscriptionsCount > 0) MviLifecycle.SUBSCRIBED else MviLifecycle.UNSUBSCRIBED
+        }
         .stateIn(scope, SharingStarted.Eagerly, MviLifecycle.IDLE)
 
+    private val anySubscribe = lifecycle.filter { it == MviLifecycle.SUBSCRIBED }
+
+    private val firstSubscribe = anySubscribe.take(1)
+
+    private val anyUnsubscribe = lifecycle.filter { it == MviLifecycle.UNSUBSCRIBED }
+
+    init {
+        logLifecycle()
+    }
+
     public fun onInit(block: suspend () -> Unit) {
-        isStateSubscribed
-            .filter { it == true }
-            .take(1)
-            .onEach {
-                logger.onInit()
-                block()
-            }
+        firstSubscribe
+            .onEach { block() }
             .launchIn(scope)
     }
 
     public fun onSubscribe(block: suspend () -> Unit) {
-        isStateSubscribed
-            .filter { it == true }
-            .onEach {
-                logger.onSubscribe()
-                block()
-            }
+        anySubscribe
+            .onEach { block() }
             .launchIn(scope)
     }
 
     public fun onUnsubscribe(block: suspend () -> Unit) {
-        isStateSubscribed
-            .filter { it == false }
-            .onEach {
-                logger.onUnsubscribe()
-                block()
-            }
+        anyUnsubscribe
+            .onEach { block() }
             .launchIn(scope)
+    }
+
+
+    private fun logLifecycle() {
+        onInit { logger.onInit() }
+        onSubscribe { logger.onSubscribe() }
+        onUnsubscribe { logger.onUnsubscribe() }
     }
 }
 

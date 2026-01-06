@@ -20,6 +20,7 @@ import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.MviError
 import com.adamczewski.kmpmvi.mvi.error.observeError
+import com.adamczewski.kmpmvi.mvi.lifecycle.MviLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +56,8 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
     public val progress: ProgressManager = container.progress
 
     public val messages: Flow<Message> = container.messenger.messages
+
+    public val lifecycle: StateFlow<MviLifecycle> = container.lifecycle
 
     init {
         container.handleActions {

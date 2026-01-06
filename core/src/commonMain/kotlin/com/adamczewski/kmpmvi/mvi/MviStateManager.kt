@@ -5,6 +5,7 @@ import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.MviError
 import com.adamczewski.kmpmvi.mvi.error.observeError
+import com.adamczewski.kmpmvi.mvi.lifecycle.MviLifecycle
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
@@ -50,6 +51,8 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
     public val progress: ProgressManager = container.progress
 
     public val messages: Flow<Message> = container.messenger.messages
+
+    public val lifecycle: StateFlow<MviLifecycle> = container.lifecycle
 
     init {
         container.handleActions {

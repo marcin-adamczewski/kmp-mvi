@@ -4,6 +4,7 @@ import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.effects.EffectsManager
 import com.adamczewski.kmpmvi.mvi.lifecycle.LifecycleManager
+import com.adamczewski.kmpmvi.mvi.lifecycle.MviLifecycle
 import com.adamczewski.kmpmvi.mvi.logger.MviLogger
 import com.adamczewski.kmpmvi.mvi.logger.NoOpLogger
 import com.adamczewski.kmpmvi.mvi.messenger.Messenger
@@ -66,6 +67,8 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     public val progress: ProgressManager = ProgressManager()
 
     public val messenger: Messenger<Message> = Messenger<Message>(scope)
+
+    public val lifecycle: StateFlow<MviLifecycle> = lifecycleManager.lifecycle
 
     init {
         scope.launch {

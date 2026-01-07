@@ -5,6 +5,8 @@ import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.MviError
 import com.adamczewski.kmpmvi.mvi.error.observeError
+import com.adamczewski.kmpmvi.mvi.lifecycle.LifecycleAware
+import com.adamczewski.kmpmvi.mvi.lifecycle.LifecycleManager
 import com.adamczewski.kmpmvi.mvi.lifecycle.MviLifecycle
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
@@ -25,7 +27,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
-) : Closeable, MviComponent<Action, State, Effect> {
+) : Closeable, MviComponent<Action, State, Effect>, LifecycleAware {
     private val closeables = mutableListOf(*closeables)
 
     protected val container: BaseMviContainer<Action, State, Effect, Message> =
@@ -53,6 +55,8 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
     public val messages: Flow<Message> = container.messenger.messages
 
     public val lifecycle: StateFlow<MviLifecycle> = container.lifecycle
+
+    override val lifecycleManager: LifecycleManager = container.lifecycleManager
 
     init {
         container.handleActions {

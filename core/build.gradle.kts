@@ -62,7 +62,6 @@ kotlin {
             implementation(libs.junit.api)
             implementation(libs.junit.engine)
             implementation(libs.junit.params)
-            implementation(libs.mockk.mockk)
         }
     }
 }

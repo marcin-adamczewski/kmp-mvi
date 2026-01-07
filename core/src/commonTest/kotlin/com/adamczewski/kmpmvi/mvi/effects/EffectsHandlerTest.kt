@@ -1,9 +1,7 @@
-package kmpmvi
+package com.adamczewski.kmpmvi.mvi.effects
 
 import app.cash.turbine.test
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
-import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
-import com.adamczewski.kmpmvi.mvi.effects.UniqueEffect
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CancellationException
@@ -11,8 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
@@ -27,7 +24,7 @@ class EffectsHandlerTest {
     }
 
     @Test
-    fun `given consumeFlow called, when two effects emitted, then consume two effects`() = runTest {
+    fun `given consumeFlow called when two effects emitted then consume two effects`() = runTest {
         val consumer = EffectConsumer()
         val sut = createSut(consumer)
         assertEquals(0, consumer.consumedEffectsCount())
@@ -37,14 +34,14 @@ class EffectsHandlerTest {
                 effectsFlow.emit(UniqueEffect(TestEffect.Refresh))
 
                 assertEquals(2, consumer.consumedEffects.size)
-                assertEquals(consumer.consumedEffects.get(0).effect, TestEffect.Navigate("first"))
-                assertEquals(consumer.consumedEffects.get(1).effect, TestEffect.Refresh)
+                assertEquals(consumer.consumedEffects[0].effect, TestEffect.Navigate("first"))
+                assertEquals(consumer.consumedEffects[1].effect, TestEffect.Refresh)
                 cancelAndConsumeRemainingEvents()
             }
     }
 
     @Test
-    fun `given consumeFlow called, when two effects emitted but the first should be not consumed, then consume only the second effect`() =
+    fun `given consumeFlow called when two effects emitted but the first should be not consumed then consume only the second effect`() =
         runTest {
             val consumer = EffectConsumer()
             val sut = createSut(consumer)
@@ -55,13 +52,13 @@ class EffectsHandlerTest {
                     effectsFlow.emit(UniqueEffect(TestEffect.Refresh))
 
                     assertEquals(1, consumer.consumedEffects.size)
-                    assertEquals(consumer.consumedEffects.get(0).effect, TestEffect.Refresh)
+                    assertEquals(consumer.consumedEffects[0].effect, TestEffect.Refresh)
                     cancelAndConsumeRemainingEvents()
                 }
         }
 
     @Test
-    fun `when consume specific effects, then only consume those effects`() = runTest {
+    fun `when consume specific effects then only consume those effects`() = runTest {
         val consumer = EffectConsumer()
         val sut = createSut(consumer)
         assertEquals(0, consumer.consumedEffectsCount())
@@ -72,14 +69,14 @@ class EffectsHandlerTest {
                 effectsFlow.emit(UniqueEffect(TestEffect.Navigate("second")))
 
                 assertEquals(2, consumer.consumedEffects.size)
-                assertEquals(consumer.consumedEffects.get(0).effect, TestEffect.Navigate("first"))
-                assertEquals(consumer.consumedEffects.get(1).effect, TestEffect.Navigate("second"))
+                assertEquals(consumer.consumedEffects[0].effect, TestEffect.Navigate("first"))
+                assertEquals(consumer.consumedEffects[1].effect, TestEffect.Navigate("second"))
                 cancelAndConsumeRemainingEvents()
             }
     }
 
     @Test
-    fun `when consume base effects, then only consume those effects`() = runTest {
+    fun `when consume base effects then only consume those effects`() = runTest {
         val consumer = EffectConsumer()
         val sut = createSut(consumer)
         assertEquals(0, consumer.consumedEffectsCount())
@@ -89,17 +86,17 @@ class EffectsHandlerTest {
                 effectsFlow.emit(UniqueEffect(TestEffect.ChildBaseEffect))
 
                 assertEquals(1, consumer.consumedEffects.size)
-                assertEquals(consumer.consumedEffects.get(0).effect, TestEffect.ChildBaseEffect)
+                assertEquals(consumer.consumedEffects[0].effect, TestEffect.ChildBaseEffect)
                 cancelAndConsumeRemainingEvents()
             }
     }
 
     @Test
-    fun `given consumeFlow called, when handling effect interrupted with CancellationException, then do not consume effect`() =
+    fun `given consumeFlow called when handling effect interrupted with CancellationException then do not consume effect`() =
         runTest {
             val consumer = EffectConsumer()
             val sut = createSut(consumer)
-            sut.consumeFlow(handler = { throw CancellationException() })
+            sut.consumeFlow(handler = { throw CancellationException("test") })
                 .test {
                     effectsFlow.emit(UniqueEffect(TestEffect.Refresh))
                     assertEquals(0, consumer.consumedEffectsCount())
@@ -108,7 +105,7 @@ class EffectsHandlerTest {
         }
 
     @Test
-    fun `given consumeFlow called, when handling effect interrupted with non CancellationException, then do not consume effect`() =
+    fun `given consumeFlow called when handling effect interrupted with non CancellationException then do not consume effect`() =
         runTest {
             val consumer = EffectConsumer()
             val sut = createSut(consumer)
@@ -120,68 +117,65 @@ class EffectsHandlerTest {
                 }
         }
 
-    @Nested
-    inner class ActiveConsumers {
-        @Test
-        fun `when consumeFlow called, then effects have active consumer while subscription is active`() =
-            runTest {
-                val sut = createSut()
-                assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+    @Test
+    fun `ActiveConsumers - when consumeFlow called then effects have active consumer while subscription is active`() =
+        runTest {
+            val sut = createSut()
+            assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+            assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
 
-                sut.consumeFlow(handler = { })
-                    .test {
-                        assertTrue(sut.isEffectConsumerActive(TestEffect.Refresh))
-                        assertTrue(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+            sut.consumeFlow(handler = { })
+                .test {
+                    assertTrue(sut.isEffectConsumerActive(TestEffect.Refresh))
+                    assertTrue(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
 
-                        cancelAndConsumeRemainingEvents()
+                    cancelAndConsumeRemainingEvents()
 
-                        assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                        assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
-                    }
-            }
-
-        @Test
-        fun `when consumeEffectFlow called, then only given effect has active consumer while subscription is active`() =
-            runTest {
-                val sut = createSut()
-                assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
-
-                sut.consumeEffectFlow<TestEffect.ChildBaseEffect> {}
-                    .test {
-                        assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                        assertTrue(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
-
-                        cancelAndConsumeRemainingEvents()
-
-                        assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                        assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
-                    }
-            }
-
-        @Test
-        fun `when consume active, then effects have active consumer while subscription is active`() =
-            runTest {
-                val sut = createSut()
-                assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
-
-                val job = launch {
-                    sut.consume(handler = { })
+                    assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+                    assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
                 }
-                advanceUntilIdle()
+        }
 
-                assertTrue(sut.isEffectConsumerActive(TestEffect.Refresh))
-                assertTrue(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+    @Test
+    fun `ActiveConsumers - when consumeEffectFlow called then only given effect has active consumer while subscription is active`() =
+        runTest {
+            val sut = createSut()
+            assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+            assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
 
-                job.cancel()
-                advanceUntilIdle()
+            sut.consumeEffectFlow<TestEffect.ChildBaseEffect> {}
+                .test {
+                    assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+                    assertTrue(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
 
-                assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
-                assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+                    cancelAndConsumeRemainingEvents()
+
+                    assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+                    assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+                }
+        }
+
+    @Test
+    fun `ActiveConsumers - when consume active then effects have active consumer while subscription is active`() =
+        runTest {
+            val sut = createSut()
+            assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+            assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+
+            val job = launch {
+                sut.consume(handler = { })
             }
-    }
+            advanceUntilIdle()
+
+            assertTrue(sut.isEffectConsumerActive(TestEffect.Refresh))
+            assertTrue(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+
+            job.cancel()
+            advanceUntilIdle()
+
+            assertFalse(sut.isEffectConsumerActive(TestEffect.Refresh))
+            assertFalse(sut.isEffectConsumerActive(TestEffect.ChildBaseEffect))
+        }
 }
 
 private interface BaseEffect

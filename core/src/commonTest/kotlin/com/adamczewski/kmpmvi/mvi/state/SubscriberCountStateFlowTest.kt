@@ -1,21 +1,20 @@
-package kmpmvi.state
+package com.adamczewski.kmpmvi.mvi.state
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.state.SubscriberCountStateFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubscriberCountStateFlowTest {
 
     @Test
-    fun `given SubscriberCountStateFlow, when created, then subscription count is 0`() = runTest {
+    fun `given SubscriberCountStateFlow when created then subscription count is 0`() = runTest {
         val upstream = MutableStateFlow(1)
         val sut = SubscriberCountStateFlow(upstream)
 
@@ -25,7 +24,7 @@ class SubscriberCountStateFlowTest {
     }
 
     @Test
-    fun `given SubscriberCountStateFlow, when collected, then subscription count increases and decreases on cancel`() = runTest {
+    fun `given SubscriberCountStateFlow when collected then subscription count increases and decreases on cancel`() = runTest {
         val upstream = MutableStateFlow(1)
         val sut = SubscriberCountStateFlow(upstream)
 
@@ -44,7 +43,7 @@ class SubscriberCountStateFlowTest {
     }
 
     @Test
-    fun `when multiple collectors, then subscription count increases accordingly`() = runTest {
+    fun `when multiple collectors then subscription count increases accordingly`() = runTest {
         val upstream = MutableStateFlow(1)
         val sut = SubscriberCountStateFlow(upstream)
 
@@ -66,7 +65,7 @@ class SubscriberCountStateFlowTest {
     }
 
     @Test
-    fun `given SubscriberCountStateFlow, then value and replay cache are delegated to upstream`() {
+    fun `given SubscriberCountStateFlow then value and replay cache are delegated to upstream`() {
         val upstream = MutableStateFlow(1)
         val sut = SubscriberCountStateFlow(upstream)
 
@@ -80,7 +79,7 @@ class SubscriberCountStateFlowTest {
     }
 
     @Test
-    fun `when upstream emits, then collector receives values`() = runTest {
+    fun `when upstream emits then collector receives values`() = runTest {
         val upstream = MutableStateFlow(1)
         val sut = SubscriberCountStateFlow(upstream)
 
@@ -98,7 +97,7 @@ class SubscriberCountStateFlowTest {
     }
 
     @Test
-    fun `when upstream emits same values twice, then collector receives value once`() = runTest {
+    fun `when upstream emits same values twice then collector receives value once`() = runTest {
         val upstream = MutableStateFlow(1)
         val sut = SubscriberCountStateFlow(upstream)
 

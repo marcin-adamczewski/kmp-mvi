@@ -1,38 +1,35 @@
-package kmpmvi
+package com.adamczewski.kmpmvi.mvi
 
-import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
-import com.adamczewski.kmpmvi.mvi.MviStateManager
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.model.NoState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MessagingStateManagerTest {
 
-    @BeforeEach
+    @BeforeTest
     fun beforeEach() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
-    @AfterEach
+    @AfterTest
     fun cleanUp() {
         Dispatchers.resetMain()
     }
 
     @Test
-    fun `given observer using onMessage, when message emitted, then observer notified`() = runTest {
+    fun `given observer using onMessage when message emitted then observer notified`() = runTest {
         val childStateManager = TestMessagingStateManager()
         var receivedMessage: String? = null
         val parentStateManager =
@@ -56,7 +53,7 @@ class MessagingStateManagerTest {
     }
 
     @Test
-    fun `given observer using onMessageFlow, when message emitted, then observer notified`() =
+    fun `given observer using onMessageFlow when message emitted then observer notified`() =
         runTest {
             val childStateManager = TestMessagingStateManager()
             var receivedMessage: String? = null

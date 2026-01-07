@@ -2,6 +2,7 @@ package com.adamczewski.kmpmvi.mvi.actions
 
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.utils.MarkedFlow
+import com.adamczewski.kmpmvi.mvi.utils.throttleFirst
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitAll
@@ -17,9 +18,13 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 public class ActionsManager<Action : MviAction>(
     @PublishedApi internal val scope: CoroutineScope,
+    @PublishedApi  internal val isThrottleEnabled: Boolean,
+    @PublishedApi  internal val throttleDuration: Duration,
     private val actionsLock: CompletableDeferred<Unit>,
 ) {
     @PublishedApi
@@ -50,11 +55,16 @@ public class ActionsManager<Action : MviAction>(
         scope.launch {
             val actionFlow = MarkedFlow(
                 actions.filterIsInstance<T>(),
-                onCollect = {
-                    isCollected.complete(Unit)
-                }
+                onCollect = { isCollected.complete(Unit) }
             )
             actionFlow
+                .run {
+                    if (isThrottleEnabled) {
+                        throttleFirst(throttleDuration)
+                    } else {
+                        this
+                    }
+                }
                 .transformer()
                 .onEach {
                     if (!actionFlow.collected) {
@@ -89,4 +99,8 @@ public class ActionsManager<Action : MviAction>(
                 "Make sure to collect it in " +
                 "the Flow receiver passed to onActionFlow"
     )
+}
+
+public class ActionConfig {
+    public var throttleDuration: Duration = 500.milliseconds
 }

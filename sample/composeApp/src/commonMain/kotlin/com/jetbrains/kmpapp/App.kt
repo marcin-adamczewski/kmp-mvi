@@ -32,6 +32,7 @@ fun App() {
             // isLoggerEnabled = BuildConfigUtils.isDebugBuild()
             isLoggerEnabled = true
             effectsBufferSize = 20
+            isActionsThrottleEnabled = false
         }
     }
 

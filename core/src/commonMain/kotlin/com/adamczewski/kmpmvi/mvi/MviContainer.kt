@@ -60,7 +60,12 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     private val effectsManager = EffectsManager<Effects>(settings.effectsBufferSize)
     override val effects: EffectsHandler<Effects> = effectsManager.effectsHandler
 
-    private val actions = ActionsManager<Action>(scope, handleActionCalled)
+    private val actions = ActionsManager<Action>(
+        scope = scope,
+        isThrottleEnabled = settings.isActionsThrottleEnabled,
+        throttleDuration = settings.actionThrottleDuration,
+        actionsLock = handleActionCalled
+    )
 
     public val lifecycleManager: LifecycleManager =
         LifecycleManager(subscribersCount, scope, logger)

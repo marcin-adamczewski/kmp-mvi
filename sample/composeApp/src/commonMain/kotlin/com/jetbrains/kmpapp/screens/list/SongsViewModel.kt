@@ -24,9 +24,11 @@ import com.jetbrains.kmpapp.utils.onSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlin.time.Duration.Companion.seconds
 
 class SongsViewModel(
     private val musicRepository: MusicRepository,
@@ -47,6 +49,11 @@ class SongsViewModel(
     }
 
     override fun ActionsManager<SongsAction>.handleActions() {
+        onActionFlow<Init>(10.seconds) {
+            emptyFlow<Int>()
+        }
+
+
         onActionFlowSingle<Init> {
             searchQuery.flatMapLatest { query ->
                 musicRepository.getSongs(query = query)

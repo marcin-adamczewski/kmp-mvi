@@ -35,6 +35,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 class MviContainerTest {
 
@@ -60,7 +61,9 @@ class MviContainerTest {
                 logger = { DefaultMviLogger("MviContainerTest") },
                 effectsBufferSize = effectsBufferSize,
                 exceptionHandler = exceptionHandler,
-                scopeProvider = scopeProvider
+                scopeProvider = scopeProvider,
+                isActionsThrottleEnabled = true,
+                actionThrottleDuration = 500.milliseconds
             )
         )
     }

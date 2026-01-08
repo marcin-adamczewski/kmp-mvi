@@ -72,3 +72,11 @@ jobs:
     - name: Build Sample App (Wasm)
       if: matrix.target == 'wasmJsTest'
       run: ./gradlew :sample:composeApp:wasmJsBrowserDistribution
+
+    - name: Upload Test Reports
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report-${{ matrix.target }}
+        path: |
+          **/build/reports/tests/

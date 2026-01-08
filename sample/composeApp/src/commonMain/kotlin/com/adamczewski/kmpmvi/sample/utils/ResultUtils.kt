@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.utils
+package com.adamczewski.kmpmvi.sample.utils
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach

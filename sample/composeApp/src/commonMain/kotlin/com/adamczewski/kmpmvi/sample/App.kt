@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp
+package com.adamczewski.kmpmvi.sample
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -13,8 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.adamczewski.kmpmvi.mvi.MviConfig
 import com.adamczewski.kmpmvi.mvi.settings.buildMviSettingsProvider
-import com.jetbrains.kmpapp.screens.detail.SongDetailsScreen
-import com.jetbrains.kmpapp.screens.list.SongsScreen
+import com.adamczewski.kmpmvi.sample.screens.detail.SongDetailsScreen
+import com.adamczewski.kmpmvi.sample.screens.list.SongsScreen
 import kotlinx.serialization.Serializable
 
 @Serializable

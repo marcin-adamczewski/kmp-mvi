@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.jetbrains.kmpapp.screens.list
+package com.adamczewski.kmpmvi.sample.screens.list
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -38,8 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.adamczewski.kmp.compose.handleEffects
-import com.jetbrains.kmpapp.data.Song
-import com.jetbrains.kmpapp.screens.EmptyScreenContent
+import com.adamczewski.kmpmvi.sample.data.Song
+import com.adamczewski.kmpmvi.sample.screens.EmptyScreenContent
 import com.zumba.consumerapp.ui.utils.collectAsStateWithLifecycle
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel

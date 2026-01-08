@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.screens.detail
+package com.adamczewski.kmpmvi.sample.screens.detail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,8 +28,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jetbrains.kmpapp.data.Song
+import com.adamczewski.kmpmvi.sample.data.Song
 import com.zumba.consumerapp.ui.utils.collectAsStateWithLifecycle
 import kmp_mvi.sample.composeapp.generated.resources.Res
 import kmp_mvi.sample.composeapp.generated.resources.back

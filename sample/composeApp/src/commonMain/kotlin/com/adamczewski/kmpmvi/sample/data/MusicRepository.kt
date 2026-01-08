@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.data
+package com.adamczewski.kmpmvi.sample.data
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay

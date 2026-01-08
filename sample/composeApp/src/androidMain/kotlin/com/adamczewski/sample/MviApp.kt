@@ -1,7 +1,7 @@
-package com.jetbrains.kmpapp
+package com.adamczewski.sample
 
 import android.app.Application
-import com.jetbrains.kmpapp.di.initKoin
+import com.adamczewski.kmpmvi.sample.di.initKoin
 
 class MviApp : Application() {
     override fun onCreate() {

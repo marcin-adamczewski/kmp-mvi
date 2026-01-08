@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.screens.detail
+package com.adamczewski.kmpmvi.sample.screens.detail
 
 import com.adamczewski.kmp.viewmodel.MviViewModel
 import com.adamczewski.kmpmvi.mvi.model.MviAction
@@ -7,9 +7,9 @@ import com.adamczewski.kmpmvi.mvi.model.NoEffects
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
-import com.jetbrains.kmpapp.data.Song
-import com.jetbrains.kmpapp.data.MusicRepository
-import com.jetbrains.kmpapp.screens.detail.SongDetailsAction.*
+import com.adamczewski.kmpmvi.sample.data.Song
+import com.adamczewski.kmpmvi.sample.data.MusicRepository
+import com.adamczewski.kmpmvi.sample.screens.detail.SongDetailsAction.*
 
 class SongDetailViewModel(private val musicRepository: MusicRepository) :
     MviViewModel<SongDetailsAction, SongDetailState, NoEffects>(SongDetailState()) {

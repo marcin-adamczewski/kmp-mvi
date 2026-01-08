@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.screens.list
+package com.adamczewski.kmpmvi.sample.screens.list
 
 import com.adamczewski.kmp.viewmodel.MviViewModel
 import com.adamczewski.kmpmvi.mvi.model.MviAction
@@ -9,18 +9,16 @@ import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
 import com.adamczewski.kmpmvi.mvi.progress.watchProgress
-import com.adamczewski.kmpmvi.mvi.settings.MviSettings
-import com.adamczewski.kmpmvi.mvi.utils.buildSettings
-import com.jetbrains.kmpapp.data.MusicRepository
-import com.jetbrains.kmpapp.data.Song
-import com.jetbrains.kmpapp.screens.list.SongsAction.Init
-import com.jetbrains.kmpapp.screens.list.SongsAction.PulledToRefresh
-import com.jetbrains.kmpapp.screens.list.SongsAction.RetryClicked
-import com.jetbrains.kmpapp.screens.list.SongsAction.SearchQueryChanged
-import com.jetbrains.kmpapp.screens.list.SongsAction.SongSelected
-import com.jetbrains.kmpapp.screens.list.SongsEffect.OpenSongDetails
-import com.jetbrains.kmpapp.utils.onError
-import com.jetbrains.kmpapp.utils.onSuccess
+import com.adamczewski.kmpmvi.sample.data.MusicRepository
+import com.adamczewski.kmpmvi.sample.data.Song
+import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.Init
+import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.PulledToRefresh
+import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.RetryClicked
+import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.SearchQueryChanged
+import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.SongSelected
+import com.adamczewski.kmpmvi.sample.screens.list.SongsEffect.OpenSongDetails
+import com.adamczewski.kmpmvi.sample.utils.onError
+import com.adamczewski.kmpmvi.sample.utils.onSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged

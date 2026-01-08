@@ -1,8 +1,9 @@
-package com.jetbrains.kmpapp
+package com.adamczewski.sample
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
-import com.jetbrains.kmpapp.di.initKoin
+import com.adamczewski.kmpmvi.sample.App
+import com.adamczewski.kmpmvi.sample.di.initKoin
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {

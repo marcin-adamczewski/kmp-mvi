@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.screens
+package com.adamczewski.kmpmvi.sample.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

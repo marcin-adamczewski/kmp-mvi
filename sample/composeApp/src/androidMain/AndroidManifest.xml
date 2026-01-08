@@ -7,14 +7,14 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name=".MviApp"
+        android:name="com.adamczewski.sample.MviApp"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
-            android:name=".MainActivity">
+            android:name="com.adamczewski.sample.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

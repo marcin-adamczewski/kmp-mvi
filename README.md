@@ -48,16 +48,13 @@ kotlin {
 ### 1. Define your MVI Components
 
 Define your state, actions, and effects. They should implement `MviState`, `MviAction`, and `MviEffect` respectively.
-1. `MviState` defines the state of your UI.
-2. `MviAction` defines the UI actions, like clicks, text changes, toggles, that can be dispatched from the UI.
-3. `MviEffect` defines the side effects that can be emitted from the component.
 
 ```kotlin
 // State of your UI.
 data class SongsState(
     val isLoading: Boolean = false,
+    val error: UiError? = null,
     val songs: List<Song> = emptyList(),
-    val error: UiError? = null
 ) : MviState
 
 // Actions that can be dispatched from the UI.
@@ -70,14 +67,13 @@ sealed interface SongsAction : MviAction {
 // Usually those are navigation events, toast messages, etc.
 sealed interface SongsEffect : MviEffect {
     data class OpenSongDetails(val songId: String) : SongsEffect
+    data class OpenMediaPlayer(val songId: String) : SongsEffect
 }
 ```
 
 ### 2. Create your ViewModel or MviStateManager
 
 Extend `MviViewModel` or `MviStateManager` and implement `handleActions()`.
-
-The library features a built-in lifecycle management system based on the number of active subscribers to the state flow. You can react to these changes using `onInit`, `onSubscribe`, and `onUnsubscribe` callbacks.
 
 ```kotlin
 class SongsViewModel(
@@ -88,30 +84,38 @@ class SongsViewModel(
 ) {
 
     init {
-        // onInit is called once when the first subscriber connects to the state
+        // onInit is called once, when the first subscriber connects to the state.
+        // Use it for initilization or create an Init action and dispatch it manually whenever you want.
         onInit { 
             // withProgress - Shows progress at the beggining of the block and hides it when completed 
             withProgress {
                 repository.fetchSongs()
+                    // setState - Updates state based on the current state
                     .onSuccess { setState { copy(songs = it, error = null) } }
                     .onError { errorManager.addError(it.toLongError()) }
             }
         }
 
-        // Optional - Handle all error events in one place with use of the ErrorManager
+        // Optional - Handle all errors in one place using ErrorManager
         observeError(errorManager) { error ->
             setState { copy(error = error) }
         }
 
-        // Optional - Handle all loading events in one place with use of the ProgressManager
+        // Optional - Handle all loading events in one place using ProgressManager
         observeProgress { isLoading ->
             setState { copy(isLoading = isLoading) }
         }
     }
 
     override fun ActionsManager<SongsAction>.handleActions() {
+        // Instead of using onInit block, you can dispatch Init action manually whenever you want.
+        onActionSingle<Init> {
+            // Initialization logic here
+        }
+        
         // When song was selected in UI, emit navigation effect OpenSongDetails
         onAction<SongSelected> {
+            analytics.trackSongSelected(it.song.id)
             setEffect { OpenSongDetails(it.song.id) }
         }
         
@@ -129,7 +133,8 @@ class SongsViewModel(
 }
 ```
 
-> **Note**: The lifecycle of the MVI component is automatically managed. When using `collectAsStateWithLifecycle()` in Compose, it will trigger `onSubscribe` when the screen enters the foreground and `onUnsubscribe` when it leaves, allowing for efficient resource management.
+> **Note**: The library features a built-in lifecycle management system based on the number of active subscribers to the state flow. You can react to these changes using `onInit`, `onSubscribe`, and `onUnsubscribe` callbacks.
+> The lifecycle of the MVI component is automatically managed. When using `collectAsStateWithLifecycle()` in Compose, it will trigger `onSubscribe` when the screen enters the foreground and `onUnsubscribe` when it leaves, allowing for efficient resource management.
 
 ### 3. Use in Compose
 
@@ -171,6 +176,9 @@ fun SongsScreen(viewModel: SongsViewModel) {
     }
 }
 ```
+
+You can pass viewmodel::submitAction function down the hierarchy to your child components. 
+That way you don't have to pass many event functions down the hierarchy.
 
 ## Advanced Features
 
@@ -218,7 +226,7 @@ SongsViewModel@021ba2c6: [Initial State] - SongsState(isLoading=true, error=null
 SongsViewModel@021ba2c6: [Lifecycle] - onInit
 SongsViewModel@021ba2c6: [Lifecycle] - onSubscribe
 SongsViewModel@021ba2c6: [State] - SongsState(isLoading=false, error=null, songs=[Song(id=1, title=Midnight City, artistDisplayName=M83, releaseDate=2025-12-18)])
-SongsViewModel@021ba2c6: [Action] - SearchQueryChanged(query=)
+SongsViewModel@021ba2c6: [Action] - SearchQueryChanged(query=Water)
 SongsViewModel@021ba2c6: [Action] - SongSelected(song=Song(id=13, title=Watermelon Sugar, artistDisplayName=Harry Styles, releaseDate=2025-12-18))
 SongsViewModel@021ba2c6: [Effect] - OpenSongDetails(songId=13)
 SongsViewModel@021ba2c6: [Lifecycle] - onUnsubscribe

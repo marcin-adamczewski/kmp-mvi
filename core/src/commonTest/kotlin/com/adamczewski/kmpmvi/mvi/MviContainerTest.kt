@@ -1,7 +1,7 @@
 package com.adamczewski.kmpmvi.mvi
 
 import app.cash.turbine.test
-import com.adamczewski.kmpmvi.mvi.actions.ActionsManager.ActionNotSubscribedException
+import com.adamczewski.kmpmvi.mvi.actions.ActionNotSubscribedException
 import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -291,16 +292,23 @@ class MviContainerTest {
         }
 
     @Test
-    fun `Actions - when flow passed to onActionFlow then throw error`() {
-        assertFailsWith<ActionNotSubscribedException> {
-            runTest {
-                createSut().handleActions {
-                    onActionFlow<TestAction> {
-                        flowOf(1)
-                    }
-                }
+    fun `Actions - when flow passed to onActionFlow then throw error when action emitted`() = runTest {
+        var caughtError: Throwable? = null
+        val sut = createSut(
+            exceptionHandler = CoroutineExceptionHandler { _, exception ->
+                caughtError = exception
             }
+        )
+        sut.handleActions {
+            onActionFlow<TestAction> {
+                flowOf(1)
+            }
+
+            submitAction(TestAction.Refresh)
         }
+        advanceUntilIdle()
+
+        assertIs<ActionNotSubscribedException>(caughtError)
     }
 
     @Test

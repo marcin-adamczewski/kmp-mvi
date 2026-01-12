@@ -7,14 +7,14 @@ import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 
 @Composable
-public fun <E: MviEffect> MviComponent<*, *, E>.handleEffects(
+public fun <E: MviEffect> MviComponent<*, *, E>.consumeEffects(
     handler: suspend (E) -> Unit,
 ) {
-    effects.handleEffects(handler = handler)
+    effects.consumeEffects(handler = handler)
 }
 
 @Composable
-public fun <E: MviEffect> EffectsHandler<E>.handleEffects(
+public fun <E: MviEffect> EffectsHandler<E>.consumeEffects(
     handler: suspend (E) -> Unit,
 ) {
     LaunchedEffect(this) {

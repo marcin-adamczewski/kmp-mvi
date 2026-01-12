@@ -37,7 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.adamczewski.kmp.compose.handleEffects
+import com.adamczewski.kmp.compose.consumeEffects
 import com.adamczewski.kmpmvi.sample.data.Song
 import com.adamczewski.kmpmvi.sample.screens.EmptyScreenContent
 import com.zumba.consumerapp.ui.utils.collectAsStateWithLifecycle
@@ -60,7 +60,7 @@ fun SongsScreen(
         SongsScreen(state, viewModel::submitAction)
     }
 
-    viewModel.handleEffects { effect ->
+    viewModel.consumeEffects { effect ->
         when (effect) {
             is SongsEffect.OpenSongDetails -> navigateToDetails(effect.songId)
         }

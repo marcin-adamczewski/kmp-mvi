@@ -1,5 +1,6 @@
 package com.adamczewski.kmp.viewmodel
 
+import androidx.annotation.EmptySuper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
@@ -67,6 +68,18 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
         container.handleActions {
             handleActions()
         }
+
+        container.onInit {
+            onInit()
+        }
+
+        container.onSubscribe {
+            onSubscribe()
+        }
+
+        container.onUnsubscribe {
+            onUnsubscribe()
+        }
     }
 
     /**
@@ -79,6 +92,15 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
     open protected fun settings(): MviSettings {
         return defaultSettings()
     }
+
+    @EmptySuper
+    open protected fun onInit() {}
+
+    @EmptySuper
+    open protected fun onSubscribe() {}
+
+    @EmptySuper
+    open protected fun onUnsubscribe() {}
 
     public fun onInit(block: suspend () -> Unit) {
         container.onInit(block)

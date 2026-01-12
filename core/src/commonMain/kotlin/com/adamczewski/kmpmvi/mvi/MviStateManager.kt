@@ -62,6 +62,18 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
         container.handleActions {
             handleActions()
         }
+
+        container.onInit {
+            onInit()
+        }
+
+        container.onSubscribe {
+            onSubscribe()
+        }
+
+        container.onUnsubscribe {
+            onUnsubscribe()
+        }
     }
 
     /**
@@ -72,6 +84,12 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
     protected abstract fun ActionsManager<Action>.handleActions()
 
     open protected fun settings(): MviSettings = defaultSettings()
+
+    open protected fun onInit() {}
+
+    open protected fun onSubscribe() {}
+
+    open protected fun onUnsubscribe() {}
 
     public fun onInit(block: suspend () -> Unit) {
         container.onInit(block)

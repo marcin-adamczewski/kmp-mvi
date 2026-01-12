@@ -77,7 +77,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
         }
     }
 
-    public  fun handleActions(block: ActionsManager<Action>.() -> Unit) {
+    public fun handleActions(block: ActionsManager<Action>.() -> Unit) {
         actions.block()
         handleActionCalled.complete(Unit)
     }

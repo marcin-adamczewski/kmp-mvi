@@ -28,8 +28,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.adamczewski.kmp.compose.collectAsStateWithLifecycle
 import com.adamczewski.kmpmvi.sample.data.Song
-import com.zumba.consumerapp.ui.utils.collectAsStateWithLifecycle
 import kmp_mvi.sample.composeapp.generated.resources.Res
 import kmp_mvi.sample.composeapp.generated.resources.back
 import kmp_mvi.sample.composeapp.generated.resources.label_artist

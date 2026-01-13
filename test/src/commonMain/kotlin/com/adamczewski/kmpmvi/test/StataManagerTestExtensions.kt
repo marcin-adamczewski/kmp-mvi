@@ -37,7 +37,7 @@ public suspend fun <S, A : MviAction> MviComponent<A, S, *>.testState(
     scope: TestScope,
     validate: suspend StateManagerFlowTurbine<S, A>.() -> Unit,
 ) {
-    state.test {
+    lifecycleState.test {
         StateManagerFlowTurbine(this, this@testState, scope).validate()
     }
 }

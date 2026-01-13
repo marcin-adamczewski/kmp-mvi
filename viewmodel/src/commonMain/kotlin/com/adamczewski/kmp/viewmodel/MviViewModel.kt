@@ -47,12 +47,12 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
 
     protected val scope: CoroutineScope = container.scope
 
-    override val state: StateFlow<State> = container.state
+    override val lifecycleState: StateFlow<State> = container.lifecycleState
 
     override val observableState: StateFlow<State> = container.observableState
 
     protected val stateValue: State
-        get() = state.value
+        get() = lifecycleState.value
 
     override val effects: EffectsHandler<Effect> = container.effects
 

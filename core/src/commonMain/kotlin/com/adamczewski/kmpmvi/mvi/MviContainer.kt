@@ -53,7 +53,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     )
 
     private val stateManager: StateManager<State> = StateManager(initialState)
-    override val state: StateFlow<State> = stateManager.subscriberCountState
+    override val lifecycleState: StateFlow<State> = stateManager.subscriberCountState
     override val observableState: StateFlow<State> = stateManager.state
     public val subscribersCount: StateFlow<Int> = stateManager.subscribersCount
 

@@ -13,7 +13,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -30,7 +29,6 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -529,7 +527,7 @@ class MviContainerTest {
         }
 
         assertFalse(called)
-        sut.state.launchIn(backgroundScope)
+        sut.lifecycleState.launchIn(backgroundScope)
 
         job.join()
         assertTrue(called)
@@ -557,7 +555,7 @@ class MviContainerTest {
             assertEquals(0, unsubscribeCount)
 
             val job1 = launch {
-                sut.state.collect {}
+                sut.lifecycleState.collect {}
             }
             advanceUntilIdle()
 
@@ -565,7 +563,7 @@ class MviContainerTest {
             assertEquals(0, unsubscribeCount)
 
             val job2 = launch {
-                sut.state.collect { }
+                sut.lifecycleState.collect { }
             }
             advanceUntilIdle()
 
@@ -585,7 +583,7 @@ class MviContainerTest {
             assertEquals(1, unsubscribeCount)
 
             val job3 = launch {
-                sut.state.collect { }
+                sut.lifecycleState.collect { }
             }
             advanceUntilIdle()
 
@@ -652,7 +650,7 @@ class MviContainerTest {
             }
             advanceUntilIdle()
             val job1 = launch {
-                sut.state.collect {}
+                sut.lifecycleState.collect {}
             }
             advanceUntilIdle()
 

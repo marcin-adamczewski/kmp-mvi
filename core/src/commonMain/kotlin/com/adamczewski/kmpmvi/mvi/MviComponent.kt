@@ -6,8 +6,28 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import kotlinx.coroutines.flow.StateFlow
 
 public interface MviComponent<Action : MviAction, State, Effects : MviEffect> {
-    public val state: StateFlow<State>
+    /**
+     * StateFlow that emits current state of the component.
+     * Should be only subscribed in lifecycle aware components, e.g. in UI
+     */
+    public val lifecycleState: StateFlow<State>
+
+    /**
+     * StateFlow that emits current state of the component.
+     * Can be safely used in ViewModels and StateManager as subscribing to it
+     * doesn't impact lifecycle callbacks.
+     */
     public val observableState: StateFlow<State>
+
+    /**
+     * EffectsHandler that allows consuming effects emitted by the component.
+     * It also allows to observer effetcs without consuming them.
+     */
     public val effects: EffectsHandler<Effects>
+
+    /**
+     * Submits action to the component. Usually called from UI on clicks,
+     * toggles, text changes, etc.
+     */
     public fun submitAction(action: Action)
 }

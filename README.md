@@ -30,16 +30,16 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Core MVI components - if ViewModel integration is not required
-            implementation("com.adamczewski.kmpmvi:core:libVersion")
+            implementation("io.github.marcin-adamczewski:core:[libVersion]")
             
             // Core components + ViewModel integration
-            implementation("com.adamczewski.kmpmvi:viewmodel:libVersion")
+            implementation("io.github.marcin-adamczewski:viewmodel:[libVersion]")
             
             // Compose Multiplatform extensions
-            implementation("com.adamczewski.kmpmvi:compose:libVersion")
+            implementation("io.github.marcin-adamczewski:compose:[libVersion]")
 
             // Test utils
-            implementation("com.adamczewski.kmpmvi:test:libVersion")
+            implementation("io.github.marcin-adamczewski:test:[libVersion]")
         }
     }
 }
@@ -212,7 +212,6 @@ onActionFlow<Init> {
         .onSuccess { songs ->
             setState { copy(songs = songs) }
         }
-    }
 }
 ```
 

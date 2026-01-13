@@ -26,7 +26,7 @@ public interface LifecycleAware {
         }
     }
 
-    public fun <T : Any> Flow<T>.withLifecycle(): Flow<T> {
+    public fun <T : Any?> Flow<T>.withLifecycle(): Flow<T> {
         return lifecycleManager.lifecycle
             .filter { it != MviLifecycle.IDLE }
             .flatMapLatest { lifecycle ->

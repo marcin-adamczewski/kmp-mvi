@@ -15,5 +15,6 @@ jobs:
           java-version: 21
       - name: Publish to MavenCentral
         run: |
-          echo "LS0tLS1CRUdJTiBQR1AgUFJJVkFURSBLRVkgQkxPQ0stLS0tLQoKMTIzVGVzdDEyMwo9Z1JhYQotLS0tLUVORCBQR1AgUFJJVkFURSBLRVkgQkxPQ0stLS0tLQ==" | base64 -D
+          export ORG_GRADLE_PROJECT_signingInMemoryKey=$(echo "${{ secrets.TEST_DESCRET }}" | base64 -D)
+          echo $ORG_GRADLE_PROJECT_signingInMemoryKey
 

@@ -16,7 +16,7 @@ jobs:
           java-version: 21
       - name: Publish to MavenCentral
         run: |
-          export ORG_GRADLE_PROJECT_signingInMemoryKey=$(echo "${{ secrets.GPG_KEY_CONTENTS }}" | base64 --decode)
+          export ORG_GRADLE_PROJECT_signingInMemoryKey=$(echo "${{ secrets.GPG_KEY_CONTENTS }}" | base64 -D)
           ./gradlew publishToMavenCentral -Pversion=${{ github.ref_name }} -PsignAllPublications=true --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}

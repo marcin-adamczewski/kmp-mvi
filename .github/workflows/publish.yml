@@ -15,6 +15,10 @@ jobs:
           java-version: 21
       - name: Publish to MavenCentral
         run: |
-          export ORG_GRADLE_PROJECT_signingInMemoryKey=$(echo "${{ secrets.TEST_SECRET }}" | base64 -D)
+          # Use the heredoc <<EOF syntax to handle multi-line content correctly
+          echo "ORG_GRADLE_PROJECT_signingInMemoryKey<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.TEST_SECRET }}" | base64 -D >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
           echo "$ORG_GRADLE_PROJECT_signingInMemoryKey"
 

@@ -16,5 +16,5 @@ jobs:
       - name: Publish to MavenCentral
         run: |
           export ORG_GRADLE_PROJECT_signingInMemoryKey=$(echo "${{ secrets.TEST_SECRET }}" | base64 -D)
-          echo $ORG_GRADLE_PROJECT_signingInMemoryKey
+          echo "$ORG_GRADLE_PROJECT_signingInMemoryKey"
 

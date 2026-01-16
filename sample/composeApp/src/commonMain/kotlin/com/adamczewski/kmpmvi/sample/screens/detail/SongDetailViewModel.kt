@@ -1,6 +1,6 @@
 package com.adamczewski.kmpmvi.sample.screens.detail
 
-import com.adamczewski.kmp.viewmodel.MviViewModel
+import com.adamczewski.kmpmvi.viewmodel.MviViewModel
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.NoEffects

@@ -1,4 +1,4 @@
-package com.adamczewski.kmp.compose
+package com.adamczewski.kmpmvi.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State

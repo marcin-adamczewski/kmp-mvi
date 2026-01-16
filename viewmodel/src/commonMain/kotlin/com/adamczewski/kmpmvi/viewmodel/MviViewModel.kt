@@ -1,4 +1,4 @@
-package com.adamczewski.kmp.viewmodel
+package com.adamczewski.kmpmvi.viewmodel
 
 import androidx.annotation.EmptySuper
 import androidx.lifecycle.ViewModel

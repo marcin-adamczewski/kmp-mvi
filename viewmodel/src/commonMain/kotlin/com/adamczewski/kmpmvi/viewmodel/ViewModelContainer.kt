@@ -1,4 +1,4 @@
-package com.adamczewski.kmp.viewmodel
+package com.adamczewski.kmpmvi.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager

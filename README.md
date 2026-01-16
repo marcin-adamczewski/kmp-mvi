@@ -150,7 +150,7 @@ fun SongsScreen(viewModel: SongsViewModel) {
     var searchQuery by rememberSavable { mutableStateOf("") }
 
     // Handle one-time side effects
-    viewModel.consumeEffects { effect ->
+    viewModel.ConsumeEffects { effect ->
         when (effect) {
             is SongsEffect.OpenSongDetails -> { /* navigate to details */ }
         }

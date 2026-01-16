@@ -1,5 +1,3 @@
-## Work in progress - no official release yet
-
 # kmp-mvi
 
 A lightweight, flexible, and powerful MVI (Model-View-Intent) library for Kotlin Multiplatform. Designed to simplify state management in your KMP projects with first-class support for Coroutines, Flow, and Compose.

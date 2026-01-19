@@ -128,6 +128,12 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
         container.setState(reducer)
     }
 
+    protected inline fun <reified T : State> updateState(
+        crossinline reducer: T.() -> State
+    ) {
+        container.updateState<T>(reducer)
+    }
+
     protected suspend fun setEffect(
         reducer: suspend State.() -> Effect,
     ) {

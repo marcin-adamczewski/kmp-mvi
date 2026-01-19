@@ -63,6 +63,85 @@ class MviContainerTest {
         )
     }
 
+    private fun createSealedStateSut(
+        initialState: SealedTestState = SealedTestState.Loading,
+        effectsBufferSize: Int = 10,
+        exceptionHandler: CoroutineExceptionHandler? = null,
+        scope: CoroutineScope? = null,
+    ): MviContainer<TestAction, SealedTestState, TestEffect> {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+
+        return MviContainer<TestAction, SealedTestState, TestEffect>(
+            scopeProvider = { scope ?: scopeProvider() },
+            initialState = initialState,
+            settings = MviSettings(
+                isLoggerEnabled = true,
+                logger = { DefaultMviLogger("MviContainerTest") },
+                effectsBufferSize = effectsBufferSize,
+                exceptionHandler = exceptionHandler,
+                scopeProvider = { scope ?: scopeProvider() }
+            )
+        )
+    }
+
+    @Test
+    fun `State - when initial state set, then state emitted to subscribers`() = runTest {
+        val sut = createSut(initialState = TestState(value = "initial"))
+        sut.testState(this) {
+            assertEquals(TestState(value = "initial"), awaitItem())
+            expectNoEvents()
+            cancel()
+        }
+    }
+
+    @Test
+    fun `State - when state set, then state emitted to subscribers`() = runTest {
+        val sut = createSut()
+        sut.testState(this) {
+            assertEquals(TestState(), awaitItem())
+
+            sut.setState { copy(value = "test") }
+
+            assertEquals(TestState(value = "test", refreshed = false), awaitItem())
+
+            sut.setState { copy(value = "test2", refreshed = true) }
+            sut.setState { copy(value = "test3", refreshed = false) }
+
+            assertEquals(TestState(value = "test2", refreshed = true), awaitItem())
+            assertEquals(TestState(value = "test3", refreshed = false), awaitItem())
+        }
+    }
+
+    @Test
+    fun `State - when sealed state updated, then updated state emitted to subscribers`() = runTest {
+        val sut = createSealedStateSut(initialState = SealedTestState.Loading)
+        sut.testState(this) {
+            assertEquals(SealedTestState.Loading, awaitItem())
+
+            sut.setState { SealedTestState.Data(id = "id") }
+
+            assertEquals(SealedTestState.Data(id = "id"), awaitItem())
+
+            sut.updateState<SealedTestState.Data> { SealedTestState.Data(id = "id2") }
+
+            assertEquals(SealedTestState.Data(id = "id2"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `State - given loading state, when non-present data state updated, then state is not updated`() = runTest {
+        val sut = createSealedStateSut(initialState = SealedTestState.Loading)
+        sut.testState(this) {
+            assertEquals(SealedTestState.Loading, awaitItem())
+
+            // We can't update Data state as the current state is Loading
+            sut.updateState<SealedTestState.Data> { SealedTestState.Data(id = "id2") }
+
+            expectNoEvents()
+            cancel()
+        }
+    }
+
     @Test
     fun `Effects - when emitting effects before any subscription then emit all effects when subscribed`() =
         runTest {
@@ -699,4 +778,9 @@ class MviContainerTest {
         val refreshed: Boolean = false
     ) : MviState
 
+    private sealed class SealedTestState() : MviState {
+        data object Loading : SealedTestState()
+        data object Error : SealedTestState()
+        data class Data(val id: String) : SealedTestState()
+    }
 }

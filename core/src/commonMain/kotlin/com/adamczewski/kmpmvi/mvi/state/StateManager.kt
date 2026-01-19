@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+@PublishedApi
 internal class StateManager<State: MviState>(initialState: State) {
     private val _state = MutableStateFlow(initialState)
     internal val state: StateFlow<State> = _state.asStateFlow()
@@ -15,9 +16,19 @@ internal class StateManager<State: MviState>(initialState: State) {
 
     internal val subscribersCount: StateFlow<Int> = _subscriberCountState.subscriptionCount
 
+    @PublishedApi
     internal val stateValue: State get() = state.value
 
+    @PublishedApi
     internal fun setState(reducer: State.() -> State) {
         _state.update { currentValue -> reducer(currentValue) }
+    }
+
+    @PublishedApi
+    internal inline fun <reified T : State> updateState(
+        crossinline reducer: T.() -> State
+    ) {
+        val state = stateValue
+        if (state is T) setState { reducer(state) }
     }
 }

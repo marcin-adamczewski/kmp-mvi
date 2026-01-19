@@ -52,7 +52,8 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
         }
     )
 
-    private val stateManager: StateManager<State> = StateManager(initialState)
+    @PublishedApi
+    internal val stateManager: StateManager<State> = StateManager(initialState)
     override val lifecycleState: StateFlow<State> = stateManager.subscriberCountState
     override val observableState: StateFlow<State> = stateManager.state
     public val subscribersCount: StateFlow<Int> = stateManager.subscribersCount
@@ -96,6 +97,12 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
 
     public fun setState(reducer: State.() -> State) {
         stateManager.setState(reducer)
+    }
+
+    public inline fun <reified T : State> updateState(
+        crossinline reducer: T.() -> State
+    ) {
+        stateManager.updateState<T>(reducer)
     }
 
     public suspend fun setEffect(

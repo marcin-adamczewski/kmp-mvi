@@ -116,6 +116,12 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
         container.setState(reducer)
     }
 
+    protected inline fun <reified T : State> updateState(
+        crossinline reducer: T.() -> State
+    ) {
+        container.updateState<T>(reducer)
+    }
+
     protected suspend fun setEffect(
         requireConsumer: Boolean = false,
         reducer: suspend State.() -> Effect,

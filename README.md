@@ -73,7 +73,10 @@ sealed interface SongsEffect : MviEffect {
 
 ### 2. Create your ViewModel or MviStateManager
 
-Extend `MviViewModel` or `MviStateManager` and implement `handleActions()`.
+Extend `MviViewModel` or `MviStateManager` and implement `handleActions()`. 
+Alternatively, you can use the **Kotlin DSL** for a more concise configuration.
+
+#### Using Inheritance
 
 ```kotlin
 class SongsViewModel(
@@ -85,50 +88,80 @@ class SongsViewModel(
 
     init {
         // onInit is called once, when the first subscriber connects to the state.
-        // Use it for initilization or create an Init action and dispatch it manually whenever you want.
         onInit { 
             // withProgress - Shows progress at the beggining of the block and hides it when completed 
             withProgress {
                 repository.fetchSongs()
                     // setState - Updates state based on the current state
-                    .onSuccess { setState { copy(songs = it, error = null) } }
-                    .onError { errorManager.addError(it.toLongError()) }
+                    .onSuccess { setState { copy(songs = it, error = null) } 
             }
-        }
-
-        // Optional - Handle all errors in one place using ErrorManager
-        observeError(errorManager) { error ->
-            setState { copy(error = error) }
-        }
-
-        // Optional - Handle all loading events in one place using ProgressManager
-        observeProgress { isLoading ->
-            setState { copy(isLoading = isLoading) }
         }
     }
 
     override fun ActionsManager<SongsAction>.handleActions() {
-        // Instead of using onInit block, you can dispatch Init action manually whenever you want.
-        onActionSingle<Init> {
-            // Initialization logic here
-        }
-        
-        // When song was selected in UI, emit navigation effect OpenSongDetails
         onAction<SongSelected> {
-            analytics.trackSongSelected(it.song.id)
             setEffect { OpenSongDetails(it.song.id) }
         }
-        
-        // onActionFlow is very powerful and allows to act on UI actions using Flow transformers.
-        // In this example we debounce every search text change so the search doesn't run on every keystroke.
-        // This flow is automatically collected.
-        onActionFlow<SearchQueryChanged> { action ->
-            debounce(300)
-                .distinctUntilChanged()
-                .map { repository.searchSongs(action.query) }
-                .onSuccess { setState { copy(songs = it, error = null) } }
-                .onError { errorManager.addError(it.toLongError()) }
+    }
+}
+```
+
+#### Using Kotlin DSL
+
+You can use the `mvi` DSL to configure your component without overriding `handleActions`. This is available both when inheriting and when using the component as a property.
+
+```kotlin
+class SongsViewModel(
+    private val repository: MusicRepository
+) : MviViewModel<SongsAction, SongsState, SongsEffect>(
+    initialState = SongsState()
+) {
+    init {
+        mvi {
+            // DSL scoping rules:
+            // - actions { } and lifecycle { } can only be used directly inside this top-level mvi { } block
+            // - they cannot be nested inside each other or inside onAction { } blocks
+            // - scope and progress are available from all DSL scopes
+            lifecycle {
+                onInit {
+                    // withProgress - Shows progress at the beggining of the block and hides it when completed 
+                    withProgress {
+                        repository.fetchSongs()
+                            // setState - Updates state based on the current state
+                            .onSuccess { 
+                                setState { copy(songs = it, error = null) } 
+                            }
+                    }
+                }
+            }
+
+            actions {
+                onAction<SongSelected> { action ->
+                    setEffect { OpenSongDetails(action.song.id) }
+                }
+
+                onActionFlow<SearchQueryChanged> { actionFlow ->
+                    actionFlow.debounce(300).map { 
+                         // ...
+                    }
+                }
+            }
         }
+    }
+}
+```
+
+##### DSL scoping rules (important)
+
+- `actions {}` and `lifecycle {}` are only available at the top level inside an `mvi {}` block. You cannot nest `lifecycle {}` inside `actions {}` (or vice versa), and you cannot call them from within an `onAction {}` block.
+- `scope` and `progress` are available from all DSL scopes: top-level `mvi {}`, inside `actions {}` and `onAction {}`, and inside `lifecycle {}`. Use `scope` for launching coroutines when needed and `progress`/`withProgress` for handling loading states.
+
+Or even without inheritance:
+
+```kotlin
+val songsMvi = mvi<SongsAction, SongsState, SongsEffect>(SongsState()) {
+    actions {
+        onAction<SongSelected> { ... }
     }
 }
 ```

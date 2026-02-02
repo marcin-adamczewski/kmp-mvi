@@ -32,7 +32,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,
-) : MviComponent<Action, State, Effects> {
+) : MviComponent<Action, State, Effects>, Closeable {
     private val handleActionCalled = CompletableDeferred<Unit>()
 
     private val logger: MviLogger by lazy {
@@ -43,7 +43,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
         }
     }
 
-    public val scope: CoroutineScope = CoroutineScope(
+    public override val scope: CoroutineScope = CoroutineScope(
         scopeProvider().coroutineContext.let { context ->
             val exceptionHandler =
                 context[CoroutineExceptionHandler.Key] ?: settings.exceptionHandler
@@ -71,7 +71,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
             logger = logger
         )
 
-    public val progress: ProgressManager = ProgressManager()
+    public override val progress: ProgressManager = ProgressManager()
 
     public val messenger: Messenger<Message> = Messenger<Message>(scope)
 
@@ -147,6 +147,10 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     public fun clear() {
         logger.onClear()
         scope.cancel()
+    }
+
+    override fun close() {
+        clear()
     }
 
     private fun initLogger(initialState: State) {

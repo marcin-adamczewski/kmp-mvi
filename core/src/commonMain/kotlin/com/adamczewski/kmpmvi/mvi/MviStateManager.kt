@@ -23,14 +23,15 @@ import kotlinx.coroutines.flow.StateFlow
 
 public typealias MviStateManager<A, S, E> = BaseMviStateManager<A, S, E, Nothing>
 
-public abstract class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
+public open class BaseMviStateManager<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
 ) : Closeable, MviComponent<Action, State, Effect>, LifecycleAware {
     private val closeables = mutableListOf(*closeables)
 
-    protected val container: BaseMviContainer<Action, State, Effect, Message> =
+    @PublishedApi
+    internal val container: BaseMviContainer<Action, State, Effect, Message> =
         with(settings ?: settings()) {
             BaseMviContainer<Action, State, Effect, Message>(
                 initialState = initialState,
@@ -39,7 +40,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
             )
         }
 
-    protected val scope: CoroutineScope = container.scope
+    public override val scope: CoroutineScope = container.scope
 
     override val lifecycleState: StateFlow<State> = container.lifecycleState
 
@@ -50,7 +51,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
 
     override val effects: EffectsHandler<Effect> = container.effects
 
-    public val progress: ProgressManager = container.progress
+    public override val progress: ProgressManager = container.progress
 
     public val messages: Flow<Message> = container.messenger.messages
 
@@ -81,7 +82,7 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
      * It's recommended to call only methods from provided [ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
-    protected abstract fun ActionsManager<Action>.handleActions()
+    open protected fun ActionsManager<Action>.handleActions() {}
 
     open protected fun settings(): MviSettings = defaultSettings()
 
@@ -101,6 +102,10 @@ public abstract class BaseMviStateManager<Action : MviAction, State : MviState, 
 
     public fun onUnsubscribe(block: suspend () -> Unit) {
         container.onUnsubscribe(block)
+    }
+
+    public fun onActions(block: ActionsManager<Action>.() -> Unit) {
+        container.handleActions(block)
     }
 
     override fun close() {

@@ -3,6 +3,8 @@ package com.adamczewski.kmpmvi.mvi
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 public interface MviComponent<Action : MviAction, State, Effects : MviEffect> {

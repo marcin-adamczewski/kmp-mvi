@@ -16,7 +16,7 @@ import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
-import com.adamczewski.kmpmvi.mvi.utils.defaultSettings
+import com.adamczewski.kmpmvi.mvi.utils.defaultMviSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +40,7 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
             )
         }
 
-    public override val scope: CoroutineScope = container.scope
+    protected val scope: CoroutineScope = container.scope
 
     override val lifecycleState: StateFlow<State> = container.lifecycleState
 
@@ -51,7 +51,7 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
 
     override val effects: EffectsHandler<Effect> = container.effects
 
-    public override val progress: ProgressManager = container.progress
+    protected val progress: ProgressManager = container.progress
 
     public val messages: Flow<Message> = container.messenger.messages
 
@@ -84,7 +84,7 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
      */
     open protected fun ActionsManager<Action>.handleActions() {}
 
-    open protected fun settings(): MviSettings = defaultSettings()
+    open protected fun settings(): MviSettings = defaultMviSettings()
 
     open protected fun onInit() {}
 

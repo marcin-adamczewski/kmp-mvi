@@ -43,7 +43,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
         }
     }
 
-    public override val scope: CoroutineScope = CoroutineScope(
+    public val scope: CoroutineScope = CoroutineScope(
         scopeProvider().coroutineContext.let { context ->
             val exceptionHandler =
                 context[CoroutineExceptionHandler.Key] ?: settings.exceptionHandler
@@ -71,7 +71,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
             logger = logger
         )
 
-    public override val progress: ProgressManager = ProgressManager()
+    public val progress: ProgressManager = ProgressManager()
 
     public val messenger: Messenger<Message> = Messenger<Message>(scope)
 

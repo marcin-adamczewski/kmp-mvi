@@ -1,41 +1,43 @@
-package com.adamczewski.kmpmvi.mvi.dsl
+package com.adamczewski.kmpmvi.viewmodel.dsl
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
-import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.MviContainer
+import com.adamczewski.kmpmvi.mvi.dsl.RootScope
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
-import com.adamczewski.kmpmvi.mvi.settings.DefaultMviSettingsProvider
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
-import kotlinx.coroutines.CoroutineScope
+import com.adamczewski.kmpmvi.mvi.utils.defaultMviSettings
 
-@DslMarker
-public annotation class MviDsl
-
-public fun <Action : MviAction, State : MviState, Effect : MviEffect> mvi(
+public fun <Action : MviAction, State : MviState, Effect : MviEffect> ViewModel.viewmodelMvi(
     initialState: State,
-    scope: CoroutineScope? = null,
     settings: MviSettings? = null,
+    logTag: String? = null,
     block: RootScope<Action, State, Effect, Nothing>.() -> Unit
 ): MviContainer<Action, State, Effect> {
-    return mvi<Action, State, Effect, Nothing>(initialState, scope, settings, block)
+    return this.viewmodelMvi<Action, State, Effect, Nothing>(initialState, settings, logTag, block)
 }
 
-public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> mvi(
+public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> ViewModel.viewmodelMvi(
     initialState: State,
-    scope: CoroutineScope? = null,
     settings: MviSettings? = null,
+    logTag: String? = null,
     block: RootScope<Action, State, Effect, Message>.() -> Unit
 ): BaseMviContainer<Action, State, Effect, Message> {
-    val actualSettings =
-        settings ?: DefaultMviSettingsProvider.provide("mvi-dsl", MviComponent::class)
+    val actualSettings = settings ?: this.defaultMviSettings(logTag = logTag)
     val container = BaseMviContainer<Action, State, Effect, Message>(
-        scopeProvider = { scope ?: actualSettings.scopeProvider() },
+        scopeProvider = { viewModelScope },
         initialState = initialState,
         settings = actualSettings
     )
+    this.addCloseable(object: AutoCloseable {
+        override fun close() {
+            container.close()
+        }
+    })
     RootScope(container).block()
     return container
 }

@@ -1,19 +1,16 @@
 package com.adamczewski.kmpmvi.mvi.dsl
 
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
-import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
-import com.adamczewski.kmpmvi.mvi.error.MviError
-import com.adamczewski.kmpmvi.mvi.error.observeError
+import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
-import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import kotlinx.coroutines.CoroutineScope
 
 @MviDsl
-public class MviActionScope<State : MviState, Effect : MviEffect, Message : MviMessage> @PublishedApi internal constructor(
-    @PublishedApi internal val container: BaseMviContainer<*, State, Effect, Message>
+open public class BaseMviScope<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
+    @PublishedApi internal val container: BaseMviContainer<Action, State, Effect, Message>,
 ) {
     public val scope: CoroutineScope get() = container.scope
 
@@ -50,23 +47,5 @@ public class MviActionScope<State : MviState, Effect : MviEffect, Message : MviM
 
     public suspend fun <T> withProgress(block: suspend () -> T): T {
         return container.withProgress(block)
-    }
-
-    public fun observeProgress(
-        progressObservable: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit
-    ) {
-        container.observeProgress(progressObservable, block)
-    }
-
-    public fun observeProgress(block: suspend CoroutineScope.(showProgress: Boolean) -> Unit) {
-        container.observeProgress(block)
-    }
-
-    public fun <E : MviError> observeError(
-        errorManager: BaseErrorManager<E>,
-        block: suspend CoroutineScope.(E?) -> Unit
-    ) {
-        container.observeError(errorManager, block)
     }
 }

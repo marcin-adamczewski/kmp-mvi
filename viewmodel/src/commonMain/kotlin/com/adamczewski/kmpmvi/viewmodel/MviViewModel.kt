@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
-import com.adamczewski.kmpmvi.mvi.dsl.MviDslBuilder
 import com.adamczewski.kmpmvi.mvi.Closeable
 import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.model.MviState
@@ -17,7 +16,7 @@ import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import com.adamczewski.kmpmvi.mvi.utils.defaultSettings
+import com.adamczewski.kmpmvi.mvi.utils.defaultMviSettings
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.MviError
@@ -31,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 public typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, Nothing>
 
-public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
+public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -39,15 +38,14 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
 
     private val closeables = mutableListOf(*closeables)
 
-    @PublishedApi
-    internal val container: BaseMviContainer<Action, State, Effect, Message> =
+    protected val container: BaseMviContainer<Action, State, Effect, Message> =
         BaseMviContainer<Action, State, Effect, Message>(
             scopeProvider = { viewModelScope },
             initialState = initialState,
             settings = settings ?: settings()
         )
 
-    public override val scope: CoroutineScope = container.scope
+    protected val scope: CoroutineScope = container.scope
 
     override val lifecycleState: StateFlow<State> = container.lifecycleState
 
@@ -58,7 +56,7 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
 
     override val effects: EffectsHandler<Effect> = container.effects
 
-    public override val progress: ProgressManager = container.progress
+    protected val progress: ProgressManager = container.progress
 
     public val messages: Flow<Message> = container.messenger.messages
 
@@ -89,10 +87,10 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
      * It's recommended to call only methods from provided [ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
-    open protected fun ActionsManager<Action>.handleActions() {}
+    protected abstract fun ActionsManager<Action>.handleActions()
 
     open protected fun settings(): MviSettings {
-        return defaultSettings()
+        return defaultMviSettings()
     }
 
     @EmptySuper
@@ -199,14 +197,4 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
     protected fun addCloseable(closeable: Closeable) {
         closeables.add(closeable)
     }
-}
-
-/**
- * Configures the MVI component using DSL.
- */
-public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>
-        BaseMviViewModel<Action, State, Effect, Message>.mvi(
-    block: MviDslBuilder<Action, State, Effect, Message>.() -> Unit
-) {
-    MviDslBuilder(container).apply(block)
 }

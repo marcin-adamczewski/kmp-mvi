@@ -1,6 +1,7 @@
 package com.adamczewski.kmpmvi.mvi.dsl
 
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
+import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.MviError
 import com.adamczewski.kmpmvi.mvi.error.observeError
@@ -10,6 +11,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 public class RootScope<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     container: BaseMviContainer<Action, State, Effect, Message>
@@ -27,6 +29,10 @@ public class RootScope<Action : MviAction, State : MviState, Effect : MviEffect,
 
     public fun onInit(block: suspend () -> Unit) {
         container.onInit(block)
+    }
+
+    public fun submitAction(action: Action) {
+        container.submitAction(action)
     }
 
     public fun <E : MviError> observeError(

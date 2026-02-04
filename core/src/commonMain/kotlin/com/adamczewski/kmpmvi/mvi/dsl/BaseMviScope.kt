@@ -1,22 +1,28 @@
 package com.adamczewski.kmpmvi.mvi.dsl
 
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
+import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 @MviDsl
 open public class BaseMviScope<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     @PublishedApi internal val container: BaseMviContainer<Action, State, Effect, Message>,
 ) {
-    public val scope: CoroutineScope get() = container.scope
+    public val scope: CoroutineScope = container.scope
 
-    public val progress: ProgressManager get() = container.progress
+    public val progress: ProgressManager = container.progress
 
-    public val state: State get() = container.observableState.value
+    public val state: State = container.observableState.value
+
+    public val observableState: StateFlow<State> = container.observableState
+
+    public val effects: EffectsHandler<Effect> = container.effects
 
     public fun setState(reducer: State.() -> State) {
         container.setState(reducer)

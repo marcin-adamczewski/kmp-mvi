@@ -10,11 +10,17 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onSubscription
 import kotlin.random.Random
 
-class MusicRepository() {
+interface MusicRepository {
+    fun getSongs(query: String? = null): Flow<Result<List<Song>>>
+    fun getSong(id: String): Result<Song?>
+    suspend fun refresh()
+}
+
+class MusicRepositoryImpl : MusicRepository {
     private val refresh = MutableSharedFlow<Unit>()
     private val random = Random(100)
 
-    fun getSongs(query: String? = null): Flow<Result<List<Song>>> = refresh
+    override fun getSongs(query: String?): Flow<Result<List<Song>>> = refresh
         .onSubscription { emit(Unit) }
         .flatMapLatest {
             val randomInt = random.nextInt(6)
@@ -46,10 +52,10 @@ class MusicRepository() {
             }
         }
 
-    fun getSong(id: String): Result<Song?> =
+    override fun getSong(id: String): Result<Song?> =
         runCatching { sampleSongs.find { it.id == id } }
 
-    suspend fun refresh() {
+    override suspend fun refresh() {
         refresh.emit(Unit)
     }
 }

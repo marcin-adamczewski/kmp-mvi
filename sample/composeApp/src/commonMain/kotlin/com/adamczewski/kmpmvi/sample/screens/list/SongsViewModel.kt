@@ -35,6 +35,14 @@ class SongsViewModel(
     private val searchQuery = MutableStateFlow<String?>(null)
 
     init {
+        observeError(errorManager) { error ->
+            setState { copy(error = error) }
+        }
+
+        observeProgress { isLoading ->
+            setState { copy(isLoading = isLoading) }
+        }
+
         onInit {
             searchQuery
                 .flatMapLatest { query ->
@@ -46,14 +54,6 @@ class SongsViewModel(
                 }
                 .onError { errorManager.addError(it.toUiError()) }
                 .launchIn(scope)
-        }
-
-        observeError(errorManager) { error ->
-            setState { copy(error = error) }
-        }
-
-        observeProgress { isLoading ->
-            setState { copy(isLoading = isLoading) }
         }
     }
 
@@ -96,7 +96,7 @@ class SongsViewModel(
 }
 
 data class SongsState(
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val error: UiError? = null,
     val songs: List<Song>? = null
 ) : MviState {

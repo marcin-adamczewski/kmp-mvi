@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,14 @@ class SongsDslViewModel(
     private val searchQuery = MutableStateFlow<String?>(null)
 
     override val component = viewmodelMvi<SongsAction, SongsState, SongsEffect>(SongsState()) {
+        observeError(errorManager) { error ->
+            setState { copy(error = error) }
+        }
+
+        observeProgress { isLoading ->
+            setState { copy(isLoading = isLoading) }
+        }
+
         onInit {
             searchQuery
                 .flatMapLatest { query ->
@@ -42,14 +51,6 @@ class SongsDslViewModel(
                 .onSuccess { songs -> setState { copy(songs = songs, error = null) } }
                 .onError { errorManager.addError(it.toUiError()) }
                 .launchIn(scope)
-        }
-
-        observeError(errorManager) { error ->
-            setState { copy(error = error) }
-        }
-
-        observeProgress { isLoading ->
-            setState { copy(isLoading = isLoading) }
         }
 
         actions {

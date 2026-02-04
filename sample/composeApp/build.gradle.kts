@@ -69,6 +69,11 @@ kotlin {
             implementation(sampleLibs.koin.core)
             implementation(sampleLibs.koin.compose.viewmodel)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.coroutines.test)
+            implementation(project(":test"))
+        }
     }
 }
 

@@ -11,6 +11,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.utils.defaultMviSettings
+import kotlin.jvm.JvmName
 
 public fun <Action : MviAction, State : MviState, Effect : MviEffect> ViewModel.viewmodelMvi(
     initialState: State,
@@ -21,6 +22,7 @@ public fun <Action : MviAction, State : MviState, Effect : MviEffect> ViewModel.
     return this.viewmodelMvi<Action, State, Effect, Nothing>(initialState, settings, logTag, block)
 }
 
+@JvmName("mviWithMessage")
 public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> ViewModel.viewmodelMvi(
     initialState: State,
     settings: MviSettings? = null,

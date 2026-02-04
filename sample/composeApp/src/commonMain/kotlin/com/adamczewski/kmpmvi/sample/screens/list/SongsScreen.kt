@@ -66,10 +66,6 @@ fun SongsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.submitAction(SongsAction.Init)
-    }
-
     LaunchedEffect(state.error) {
         state.error?.let {
             snackbarHostState.showSnackbar(
@@ -81,7 +77,7 @@ fun SongsScreen(
 }
 
 @Composable
-private fun SongsScreen(
+fun SongsScreen(
     state: SongsState,
     submitAction: (SongsAction) -> Unit
 ) {

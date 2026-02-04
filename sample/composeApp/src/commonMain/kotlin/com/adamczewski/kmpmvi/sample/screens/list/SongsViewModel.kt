@@ -1,22 +1,16 @@
 package com.adamczewski.kmpmvi.sample.screens.list
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.adamczewski.kmpmvi.mvi.dsl.MviActionScope
 import com.adamczewski.kmpmvi.viewmodel.MviViewModel
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import com.adamczewski.kmpmvi.mvi.MviContainerHost
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 import com.adamczewski.kmpmvi.mvi.error.UiError
 import com.adamczewski.kmpmvi.mvi.error.toUiError
-import com.adamczewski.kmpmvi.mvi.dsl.mvi
 import com.adamczewski.kmpmvi.mvi.progress.watchProgress
 import com.adamczewski.kmpmvi.sample.data.MusicRepository
 import com.adamczewski.kmpmvi.sample.data.Song
-import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.Init
 import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.PulledToRefresh
 import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.RetryClicked
 import com.adamczewski.kmpmvi.sample.screens.list.SongsAction.SearchQueryChanged
@@ -41,6 +35,19 @@ class SongsViewModel(
     private val searchQuery = MutableStateFlow<String?>(null)
 
     init {
+        onInit {
+            searchQuery
+                .flatMapLatest { query ->
+                    musicRepository.getSongs(query = query)
+                        .watchProgress(progress, PROGRESS_ID)
+                }
+                .onSuccess { songs ->
+                    setState { copy(songs = songs, error = null) }
+                }
+                .onError { errorManager.addError(it.toUiError()) }
+                .launchIn(scope)
+        }
+
         observeError(errorManager) { error ->
             setState { copy(error = error) }
         }
@@ -51,24 +58,13 @@ class SongsViewModel(
     }
 
     override fun ActionsManager<SongsAction>.handleActions() {
-        onActionFlowSingle<Init> {
-            searchQuery.flatMapLatest { query ->
-                musicRepository.getSongs(query = query)
-                    .watchProgress(progress, PULL_TO_REFRESH_ID)
-                    .onSuccess { songs ->
-                        setState { copy(songs = songs, error = null) }
-                    }
-                    .onError { errorManager.addError(it.toUiError()) }
-            }
-        }
-
         onAction<PulledToRefresh> {
-            progress.addProgress(PULL_TO_REFRESH_ID)
+            progress.addProgress(PROGRESS_ID)
             musicRepository.refresh()
         }
 
         onAction<RetryClicked> {
-            progress.addProgress(PULL_TO_REFRESH_ID)
+            progress.addProgress(PROGRESS_ID)
             musicRepository.refresh()
         }
 
@@ -94,7 +90,7 @@ class SongsViewModel(
     }
 
     companion object {
-        private const val PULL_TO_REFRESH_ID = "pull_to_refresh"
+        private const val PROGRESS_ID = "pull_to_refresh"
         private const val MINIMUM_QUERY_LENGTH = 3
     }
 }
@@ -112,96 +108,8 @@ sealed interface SongsEffect : MviEffect {
 }
 
 sealed interface SongsAction : MviAction {
-    data object Init : SongsAction
     data class SongSelected(val song: Song) : SongsAction
     data object PulledToRefresh : SongsAction
     data object RetryClicked : SongsAction
     data class SearchQueryChanged(val query: String) : SongsAction
-}
-
-class SongsViewModel2(
-    private val musicRepository: MusicRepository,
-    private val errorManager: ErrorManager,
-) : ViewModel(), MviContainerHost<SongsAction, SongsState, SongsEffect> {
-    private val searchQuery = MutableStateFlow<String?>(null)
-
-    override val component = mvi<SongsAction, SongsState, SongsEffect>(
-        initialState = SongsState(),
-        scope = viewModelScope
-    ) {
-        onInit {
-            searchQuery.flatMapLatest { query ->
-                musicRepository.getSongs(query = query)
-                    .watchProgress(progress, PULL_TO_REFRESH_ID)
-                    .onSuccess { songs -> setState { copy(songs = songs, error = null) } }
-                    .onError { errorManager.addError(it.toUiError()) }
-            }.launchIn(scope)
-
-            observeError(errorManager) { error ->
-                setState { copy(error = error) }
-            }
-
-            observeProgress { isLoading ->
-                setState { copy(isLoading = isLoading) }
-            }
-        }
-
-        lifecycle {
-            onSubscribe {
-
-            }
-
-            onUnsubscribe {
-
-            }
-        }
-
-        actions {
-            onAction<PulledToRefresh> {
-                progress.addProgress(PULL_TO_REFRESH_ID)
-                musicRepository.refresh()
-            }
-
-            onAction<RetryClicked> {
-                progress.addProgress(PULL_TO_REFRESH_ID)
-                musicRepository.refresh()
-            }
-
-            onAction<SongSelected> {
-                setEffect { OpenSongDetails(it.song.id) }
-            }
-
-            onActionFlow<SearchQueryChanged> {
-                debounce(300)
-                    .map { it.query }
-                    .map { query ->
-                        if (query.length >= MINIMUM_QUERY_LENGTH) {
-                            query
-                        } else {
-                            null
-                        }
-                    }
-                    .distinctUntilChanged()
-                    .onEach { query ->
-                        searchQuery.value = query
-                    }
-            }
-        }
-    }
-
-    private fun MviActionScope<SongsState, *, *>.fetchData() {
-        searchQuery.flatMapLatest { query ->
-            musicRepository.getSongs(query = query)
-                .watchProgress(progress, PULL_TO_REFRESH_ID)
-                .onSuccess { songs ->
-                    setState { copy(songs = songs, error = null) }
-                }
-                .onError { errorManager.addError(it.toUiError()) }
-        }.launchIn(scope)
-    }
-
-    companion object Companion {
-        private const val PULL_TO_REFRESH_ID = "pull_to_refresh"
-        private const val MINIMUM_QUERY_LENGTH = 3
-    }
 }

@@ -10,6 +10,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.settings.DefaultMviSettingsProvider
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import kotlinx.coroutines.CoroutineScope
+import kotlin.jvm.JvmName
 
 @DslMarker
 public annotation class MviDsl
@@ -23,6 +24,7 @@ public fun <Action : MviAction, State : MviState, Effect : MviEffect> mvi(
     return mvi<Action, State, Effect, Nothing>(initialState, scope, settings, block)
 }
 
+@JvmName("mviWithMessage")
 public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> mvi(
     initialState: State,
     scope: CoroutineScope? = null,

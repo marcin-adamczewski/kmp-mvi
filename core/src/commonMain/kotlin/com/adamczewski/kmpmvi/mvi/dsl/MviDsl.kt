@@ -9,30 +9,38 @@ import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.settings.DefaultMviSettingsProvider
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
+import com.adamczewski.kmpmvi.mvi.utils.defaultMviSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlin.jvm.JvmName
 
 @DslMarker
 public annotation class MviDsl
 
-public fun <Action : MviAction, State : MviState, Effect : MviEffect> mvi(
+public fun <Container : Any, Action : MviAction, State : MviState, Effect : MviEffect> Container.mvi(
     initialState: State,
     scope: CoroutineScope? = null,
     settings: MviSettings? = null,
+    logTag: String? = null,
     block: RootScope<Action, State, Effect, Nothing>.() -> Unit
 ): MviContainer<Action, State, Effect> {
-    return mvi<Action, State, Effect, Nothing>(initialState, scope, settings, block)
+    return this.mvi<Container, Action, State, Effect, Nothing>(
+        initialState = initialState,
+        scope = scope,
+        settings = settings,
+        logTag = logTag,
+        block = block
+    )
 }
 
 @JvmName("mviWithMessage")
-public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> mvi(
+public fun <Container : Any, Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> Container.mvi(
     initialState: State,
     scope: CoroutineScope? = null,
     settings: MviSettings? = null,
+    logTag: String? = null,
     block: RootScope<Action, State, Effect, Message>.() -> Unit
 ): BaseMviContainer<Action, State, Effect, Message> {
-    val actualSettings =
-        settings ?: DefaultMviSettingsProvider.provide("mvi-dsl", MviComponent::class)
+    val actualSettings = settings ?: this.defaultMviSettings(logTag = logTag)
     val container = BaseMviContainer<Action, State, Effect, Message>(
         scopeProvider = { scope ?: actualSettings.scopeProvider() },
         initialState = initialState,

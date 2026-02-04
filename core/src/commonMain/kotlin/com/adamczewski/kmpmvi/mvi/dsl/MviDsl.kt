@@ -16,14 +16,14 @@ import kotlin.jvm.JvmName
 @DslMarker
 public annotation class MviDsl
 
-public fun <Container : Any, Action : MviAction, State : MviState, Effect : MviEffect> Container.mvi(
+public fun <Action : MviAction, State : MviState, Effect : MviEffect> Any.mvi(
     initialState: State,
     scope: CoroutineScope? = null,
     settings: MviSettings? = null,
     logTag: String? = null,
     block: RootScope<Action, State, Effect, Nothing>.() -> Unit
 ): MviContainer<Action, State, Effect> {
-    return this.mvi<Container, Action, State, Effect, Nothing>(
+    return this.mvi<Action, State, Effect, Nothing>(
         initialState = initialState,
         scope = scope,
         settings = settings,
@@ -33,7 +33,7 @@ public fun <Container : Any, Action : MviAction, State : MviState, Effect : MviE
 }
 
 @JvmName("mviWithMessage")
-public fun <Container : Any, Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> Container.mvi(
+public fun <Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage> Any.mvi(
     initialState: State,
     scope: CoroutineScope? = null,
     settings: MviSettings? = null,

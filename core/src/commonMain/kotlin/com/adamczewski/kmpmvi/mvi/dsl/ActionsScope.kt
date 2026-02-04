@@ -14,7 +14,7 @@ public class ActionsScope<Action : MviAction, State : MviState, Effect : MviEffe
     @PublishedApi internal val actionsManager: ActionsManager<Action>
 ) : BaseMviScope<Action, State, Effect, Message>(mviContainer) {
 
-    public inline fun <reified T : Action> ActionsScope<Action, State, Effect, Message>.onAction(
+    public inline fun <reified T : Action> onAction(
         noinline block: suspend (T) -> Unit
     ) {
         actionsManager.onAction<T> { action ->
@@ -22,7 +22,7 @@ public class ActionsScope<Action : MviAction, State : MviState, Effect : MviEffe
         }
     }
 
-    public inline fun <reified T : Action> ActionsScope<Action, State, Effect, Message>.onActionFlow(
+    public inline fun <reified T : Action> onActionFlow(
         noinline transformer: suspend Flow<T>.() -> Flow<*>
     ) {
         actionsManager.onActionFlow<T> {
@@ -30,7 +30,7 @@ public class ActionsScope<Action : MviAction, State : MviState, Effect : MviEffe
         }
     }
 
-    public inline fun <reified T : Action> ActionsScope<Action, State, Effect, Message>.onActionSingle(
+    public inline fun <reified T : Action> onActionSingle(
         noinline block: suspend (T) -> Unit
     ) {
         actionsManager.onActionSingle<T> { action ->
@@ -38,7 +38,7 @@ public class ActionsScope<Action : MviAction, State : MviState, Effect : MviEffe
         }
     }
 
-    public inline fun <reified T : Action> ActionsScope<Action, State, Effect, Message>.onActionFlowSingle(
+    public inline fun <reified T : Action> onActionFlowSingle(
         noinline flow: suspend (T) -> Flow<*>
     ) {
         actionsManager.onActionFlowSingle<T>(flow)

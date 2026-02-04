@@ -25,8 +25,8 @@ public class RootScope<Action : MviAction, State : MviState, Effect : MviEffect,
         LifecycleScope<Action, State, Effect, Message>(container).block()
     }
 
-    public fun onInit(block: InitScope<Action, State, Effect, Message>.() -> Unit) {
-        InitScope<Action, State, Effect, Message>(container).block()
+    public fun onInit(block: suspend () -> Unit) {
+        container.onInit(block)
     }
 
     public fun <E : MviError> observeError(

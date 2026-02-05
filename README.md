@@ -5,7 +5,7 @@ A lightweight, flexible, and powerful MVI (Model-View-Intent) library for Kotlin
 ## Features
 
 - **Multiplatform**: Works on Android, iOS, JVM, Wasm, and Linux.
-- **Side Effects**: Robust handling of one-time events (effects) like navigation or toast messages.
+- **Effects**: Robust handling of one-time events like navigation or toast messages.
 - **Powerful UI actions handling**: Handle UI actions with power of Flow and Coroutines.
 - **ViewModel**: Optional integration with `androidx.lifecycle.ViewModel`.
 - **Progress Management**: Easy-to-use API for tracking loading states across multiple operations.
@@ -63,7 +63,7 @@ sealed interface SongsAction : MviAction {
     data class SongSelected(val song: Song) : SongsAction
 }
 
-// Side effects that are emitted from the MviContainer and observed by the UI.
+// Effects that are emitted from the MviContainer and observed by the UI.
 // Usually those are navigation events, toast messages, etc.
 sealed interface SongsEffect : MviEffect {
     data class OpenSongDetails(val songId: String) : SongsEffect
@@ -102,6 +102,12 @@ class SongsViewModel(
         onAction<SongSelected> {
             setEffect { OpenSongDetails(it.song.id) }
         }
+
+        onActionFlow<SearchQueryChanged> {
+            debounce(300).map {
+                setState { copy(query = it) }
+            }
+        }
     }
 }
 ```
@@ -113,55 +119,29 @@ You can use the `mvi` DSL to configure your component without overriding `handle
 ```kotlin
 class SongsViewModel(
     private val repository: MusicRepository
-) : MviViewModel<SongsAction, SongsState, SongsEffect>(
-    initialState = SongsState()
-) {
-    init {
-        mvi {
-            // DSL scoping rules:
-            // - actions { } and lifecycle { } can only be used directly inside this top-level mvi { } block
-            // - they cannot be nested inside each other or inside onAction { } blocks
-            // - scope and progress are available from all DSL scopes
-            lifecycle {
-                onInit {
-                    // withProgress - Shows progress at the beggining of the block and hides it when completed 
-                    withProgress {
-                        repository.fetchSongs()
-                            // setState - Updates state based on the current state
+) : ViewModel, MviContainerHost<SongsAction, SongsState, SongsEffect> {
+
+    override val component = mviViewModel<SongsAction, SongsState, SongsEffect>(SongsState()) {
+        onInit { 
+            // withProgress - Shows progress at the beggining of the block and hides it when completed
+                withProgress { repository.fetchSongs()
+                // setState - Updates state based on the current state
                             .onSuccess { 
-                                setState { copy(songs = it, error = null) } 
-                            }
-                    }
-                }
+                                setState { copy(songs = it, error = null) } }
+            }
+        }
+
+        actions {
+            onAction<SongSelected> { action ->
+                setEffect { OpenSongDetails(action.song.id) }
             }
 
-            actions {
-                onAction<SongSelected> { action ->
-                    setEffect { OpenSongDetails(action.song.id) }
-                }
-
-                onActionFlow<SearchQueryChanged> { actionFlow ->
-                    actionFlow.debounce(300).map { 
-                         // ...
-                    }
+            onActionFlow<SearchQueryChanged> {
+                debounce(300).map { 
+                    setState { copy(query = it) }
                 }
             }
         }
-    }
-}
-```
-
-##### DSL scoping rules (important)
-
-- `actions {}` and `lifecycle {}` are only available at the top level inside an `mvi {}` block. You cannot nest `lifecycle {}` inside `actions {}` (or vice versa), and you cannot call them from within an `onAction {}` block.
-- `scope` and `progress` are available from all DSL scopes: top-level `mvi {}`, inside `actions {}` and `onAction {}`, and inside `lifecycle {}`. Use `scope` for launching coroutines when needed and `progress`/`withProgress` for handling loading states.
-
-Or even without inheritance:
-
-```kotlin
-val songsMvi = mvi<SongsAction, SongsState, SongsEffect>(SongsState()) {
-    actions {
-        onAction<SongSelected> { ... }
     }
 }
 ```
@@ -180,7 +160,7 @@ fun SongsScreen(viewModel: SongsViewModel) {
     val state by viewModel.collectAsStateWithLifecycle()
     var searchQuery by rememberSavable { mutableStateOf("") }
 
-    // Handle one-time side effects
+    // Handle one-time events
     viewModel.ConsumeEffects { effect ->
         when (effect) {
             is SongsEffect.OpenSongDetails -> { /* navigate to details */ }

@@ -85,7 +85,7 @@ class MviContainerTest {
     }
 
     @Test
-    fun `State - when initial state set, then state emitted to subscribers`() = runTest {
+    fun `State - when initial state set then state emitted to subscribers`() = runTest {
         val sut = createSut(initialState = TestState(value = "initial"))
         sut.testState(this) {
             assertEquals(TestState(value = "initial"), awaitItem())
@@ -95,7 +95,7 @@ class MviContainerTest {
     }
 
     @Test
-    fun `State - when state set, then state emitted to subscribers`() = runTest {
+    fun `State - when state set then state emitted to subscribers`() = runTest {
         val sut = createSut()
         sut.testState(this) {
             assertEquals(TestState(), awaitItem())
@@ -113,7 +113,7 @@ class MviContainerTest {
     }
 
     @Test
-    fun `State - when sealed state updated, then updated state emitted to subscribers`() = runTest {
+    fun `State - when sealed state updated then updated state emitted to subscribers`() = runTest {
         val sut = createSealedStateSut(initialState = SealedTestState.Loading)
         sut.testState(this) {
             assertEquals(SealedTestState.Loading, awaitItem())
@@ -129,7 +129,7 @@ class MviContainerTest {
     }
 
     @Test
-    fun `State - given loading state, when non-present data state updated, then state is not updated`() = runTest {
+    fun `State - given loading state when non-present data state updated then state is not updated`() = runTest {
         val sut = createSealedStateSut(initialState = SealedTestState.Loading)
         sut.testState(this) {
             assertEquals(SealedTestState.Loading, awaitItem())

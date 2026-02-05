@@ -29,6 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import com.adamczewski.kmpmvi.mvi.error.ErrorManager
 
 class MviDslTest {
 

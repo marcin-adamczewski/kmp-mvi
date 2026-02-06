@@ -133,8 +133,8 @@ class SongsViewModel(
 }
 ```
 
-> **Note**: The library features a built-in lifecycle management system based on the number of active subscribers to the state flow. You can react to these changes using `onInit`, `onSubscribe`, and `onUnsubscribe` callbacks.
-> The lifecycle of the MVI component is automatically managed. When using `collectAsStateWithLifecycle()` in Compose, it will trigger `onSubscribe` when the screen enters the foreground and `onUnsubscribe` when it leaves, allowing for efficient resource management.
+> **Note**: The library features a built-in lifecycle management system based on the number of active state and effects subscribers. You can react to lifecycle events using `onInit`, `onSubscribe`, and `onUnsubscribe` callbacks.
+> The lifecycle of the MVI component is automatically managed. E.g. when using `collectAsStateWithLifecycle()` or effects.consume {} in Compose, it will trigger `onInit` once and onSubscribe` when the screen enters the foreground and `onUnsubscribe` when it leaves, allowing for efficient resource management.
 
 ### 3. Use in Compose
 

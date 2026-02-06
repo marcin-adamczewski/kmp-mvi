@@ -852,7 +852,7 @@ class MviContainerTest {
         }
 
     @Test
-    fun `Lifecycle - when obserbing effects, then do not call callbacks and do not increase effect collectors count`() =
+    fun `Lifecycle - when obserbing effects then do not call callbacks and do not increase effect collectors count`() =
         runTest {
             val sut = createSut()
             var subscribeCount = 0

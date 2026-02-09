@@ -817,6 +817,83 @@ class MviContainerTest {
         }
 
     @Test
+    fun `Lifecycle - when subscribed to state and consumed effects then call onSubscribe once - when unsubscribe then call onUnsubscribe once`() =
+        runTest {
+            val sut = createSut()
+            var subscribeCount = 0
+            var unsubscribeCount = 0
+
+            launch {
+                sut.onSubscribe {
+                    subscribeCount++
+                }
+
+                sut.onUnsubscribe {
+                    unsubscribeCount++
+                }
+            }
+            advanceUntilIdle()
+
+            assertEquals(0, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val jobEffects1 = launch {
+                sut.effects.consume {}
+            }
+            val jobState1 = launch {
+                sut.lifecycleState.collect {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val jobEffects2 = launch {
+                sut.effects.consume {}
+            }
+            val jobState2 = launch {
+                sut.lifecycleState.collect {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            jobEffects1.cancel()
+            jobState1.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            jobEffects2.cancel()
+            jobState2.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            val jobEffects3 = launch {
+                sut.effects.consume {}
+            }
+            val jobState3 = launch {
+                sut.lifecycleState.collect {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            jobEffects3.cancel()
+            jobState3.cancel()
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(2, unsubscribeCount)
+        }
+
+
+    @Test
     fun `Lifecycle - when subscribed to non-lifecycle state then do not call callbacks and do not increase subscribers count`() =
         runTest {
             val sut = createSut()

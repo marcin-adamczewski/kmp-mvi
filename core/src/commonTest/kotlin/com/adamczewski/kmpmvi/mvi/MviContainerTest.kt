@@ -638,6 +638,31 @@ class MviContainerTest {
         assertTrue(called)
     }
 
+    // This verifies design decision to not call onInit when single effect is collected.
+    // As single effect may be consumed inside other ViewModels, not necessarily in UI.
+    @Test
+    fun `Lifecycle - when first single-effect flow consumer active then do not call onInit`() = runTest {
+        val sut = createSut()
+        var called = false
+        var collected = false
+        val job = launch {
+            sut.onInit {
+                called = true
+            }
+        }
+
+        backgroundScope.launch {
+            sut.effects.consumeEffectFlow<TestEffect.Refresh> {}.collect {
+                collected = true
+            }
+        }
+        sut.setEffect { TestEffect.Refresh }
+
+        job.join()
+        assertFalse(called)
+        assertTrue(collected)
+    }
+
     @Test
     fun `Lifecycle - when first effects flow consumer active then call onInit`() = runTest {
         val sut = createSut()

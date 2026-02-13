@@ -596,6 +596,13 @@ class MviContainerTest {
     }
 
     @Test
+    fun `Lifecycle - verify effects handler has initially zero consumers`() = runTest {
+        createSut().effects.activeConsumers.test {
+            assertEquals(0, awaitItem())
+        }
+    }
+
+    @Test
     fun `Lifecycle - when first state subscriber then call onInit`() = runTest {
         val sut = createSut()
         var called = false
@@ -610,6 +617,100 @@ class MviContainerTest {
 
         job.join()
         assertTrue(called)
+    }
+
+    @Test
+    fun `Lifecycle - when first effects consumer active then call onInit`() = runTest {
+        val sut = createSut()
+        var called = false
+        val job = launch {
+            sut.onInit {
+                called = true
+            }
+        }
+
+        assertFalse(called)
+        backgroundScope.launch {
+            sut.effects.consume {}
+        }
+
+        job.join()
+        assertTrue(called)
+    }
+
+    // This verifies design decision to not call onInit when single effect is collected.
+    // As single effect may be consumed inside other ViewModels, not necessarily in UI.
+    @Test
+    fun `Lifecycle - when first single-effect flow consumer active then do not call onInit`() = runTest {
+        val sut = createSut()
+        var called = false
+        var collected = false
+        val job = launch {
+            sut.onInit {
+                called = true
+            }
+        }
+
+        backgroundScope.launch {
+            sut.effects.consumeEffectFlow<TestEffect.Refresh> {}.collect {
+                collected = true
+            }
+        }
+        sut.setEffect { TestEffect.Refresh }
+
+        job.join()
+        assertFalse(called)
+        assertTrue(collected)
+    }
+
+    @Test
+    fun `Lifecycle - when first effects flow consumer active then call onInit`() = runTest {
+        val sut = createSut()
+        var called = false
+        val job = launch {
+            sut.onInit {
+                called = true
+            }
+        }
+
+        assertFalse(called)
+        backgroundScope.launch {
+            sut.effects.consume {}
+        }
+
+        job.join()
+        assertTrue(called)
+    }
+
+
+    @Test
+    fun `Lifecycle - when state and effects subscribed then call onInit once`() = runTest {
+        val sut = createSut()
+        var onInitCount = 0
+        var effectConsumed = false
+        var stateCollected = false
+        val job = launch {
+            sut.onInit {
+                onInitCount++
+            }
+        }
+        assertEquals(0, onInitCount)
+        sut.setEffect { TestEffect.Refresh }
+
+        sut.effects
+            .consumeFlow {
+                effectConsumed = true
+            }
+            .launchIn(backgroundScope)
+        sut.lifecycleState
+            .onEach { stateCollected = true }
+            .launchIn(backgroundScope)
+
+        job.join()
+        advanceUntilIdle()
+        assertEquals(1, onInitCount)
+        assertTrue(effectConsumed)
+        assertTrue(stateCollected)
     }
 
     @Test
@@ -677,6 +778,147 @@ class MviContainerTest {
         }
 
     @Test
+    fun `Lifecycle - when consumed effects then call onSubscribe when unsubscribe then call onUnsubscribe`() =
+        runTest {
+            val sut = createSut()
+            var subscribeCount = 0
+            var unsubscribeCount = 0
+
+            launch {
+                sut.onSubscribe {
+                    subscribeCount++
+                }
+
+                sut.onUnsubscribe {
+                    unsubscribeCount++
+                }
+            }
+            advanceUntilIdle()
+
+            assertEquals(0, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val job1 = launch {
+                sut.effects.consume {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val job2 = launch {
+                sut.effects.consume {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            job1.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            job2.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            val job3 = launch {
+                sut.effects.consume {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            job3.cancel()
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(2, unsubscribeCount)
+        }
+
+    @Test
+    fun `Lifecycle - when subscribed to state and consumed effects then call onSubscribe once - when unsubscribe then call onUnsubscribe once`() =
+        runTest {
+            val sut = createSut()
+            var subscribeCount = 0
+            var unsubscribeCount = 0
+
+            launch {
+                sut.onSubscribe {
+                    subscribeCount++
+                }
+
+                sut.onUnsubscribe {
+                    unsubscribeCount++
+                }
+            }
+            advanceUntilIdle()
+
+            assertEquals(0, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val jobEffects1 = launch {
+                sut.effects.consume {}
+            }
+            val jobState1 = launch {
+                sut.lifecycleState.collect {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            val jobEffects2 = launch {
+                sut.effects.consume {}
+            }
+            val jobState2 = launch {
+                sut.lifecycleState.collect {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            jobEffects1.cancel()
+            jobState1.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(0, unsubscribeCount)
+
+            jobEffects2.cancel()
+            jobState2.cancel()
+            advanceUntilIdle()
+
+            assertEquals(1, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            val jobEffects3 = launch {
+                sut.effects.consume {}
+            }
+            val jobState3 = launch {
+                sut.lifecycleState.collect {}
+            }
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(1, unsubscribeCount)
+
+            jobEffects3.cancel()
+            jobState3.cancel()
+            advanceUntilIdle()
+
+            assertEquals(2, subscribeCount)
+            assertEquals(2, unsubscribeCount)
+        }
+
+
+    @Test
     fun `Lifecycle - when subscribed to non-lifecycle state then do not call callbacks and do not increase subscribers count`() =
         runTest {
             val sut = createSut()
@@ -704,6 +946,42 @@ class MviContainerTest {
 
             assertTrue(collected)
             sut.subscribersCount.test {
+                assertEquals(0, awaitItem())
+                assertEquals(0, subscribeCount)
+                assertEquals(0, unsubscribeCount)
+                job1.cancel()
+            }
+        }
+
+    @Test
+    fun `Lifecycle - when obserbing effects then do not call callbacks and do not increase effect collectors count`() =
+        runTest {
+            val sut = createSut()
+            var subscribeCount = 0
+            var unsubscribeCount = 0
+
+            launch {
+                sut.onSubscribe {
+                    subscribeCount++
+                }
+
+                sut.onUnsubscribe {
+                    unsubscribeCount++
+                }
+            }
+            advanceUntilIdle()
+            sut.setEffect { TestEffect.Refresh }
+
+            var collected = false
+            val job1 = launch {
+                sut.effects.observeEffects.collect {
+                    collected = true
+                }
+            }
+            advanceUntilIdle()
+
+            assertTrue(collected)
+            sut.effects.activeConsumers.test {
                 assertEquals(0, awaitItem())
                 assertEquals(0, subscribeCount)
                 assertEquals(0, unsubscribeCount)

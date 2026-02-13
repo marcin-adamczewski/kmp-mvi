@@ -1,37 +1,39 @@
 package com.adamczewski.kmpmvi.mvi.lifecycle
 
-import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.logger.LifecycleLogger
-import com.adamczewski.kmpmvi.mvi.model.MviAction
-import com.adamczewski.kmpmvi.mvi.model.MviEffect
-import com.adamczewski.kmpmvi.mvi.model.MviState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 
 public class LifecycleManager(
     stateSubscriptionsCount: StateFlow<Int>,
+    effectsSubscribersCount: SharedFlow<Int>,
     private val scope: CoroutineScope,
     private val logger: LifecycleLogger
 ) {
-    public val lifecycle: StateFlow<MviLifecycle> = stateSubscriptionsCount
-        .drop(1) // We're not interested in initial 0 value to not call onUnsubscribe initially
+    public val lifecycle: StateFlow<MviLifecycle> = combine(
+        stateSubscriptionsCount,
+        effectsSubscribersCount
+    ) { subSubscribers, effectsSubscribers ->
+        subSubscribers + effectsSubscribers
+    }
+        // We're not interested in initial 0 values to not call onUnsubscribe initially
+        .dropWhile { it <= 0 }
         .map { subscriptionsCount ->
             if (subscriptionsCount > 0) MviLifecycle.SUBSCRIBED else MviLifecycle.UNSUBSCRIBED
         }
+        .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, MviLifecycle.IDLE)
 
     private val anySubscribe = lifecycle.filter { it == MviLifecycle.SUBSCRIBED }

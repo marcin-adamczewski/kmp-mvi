@@ -5,20 +5,22 @@ import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
 import kotlin.reflect.KClass
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.decrementAndFetch
-import kotlin.concurrent.atomics.incrementAndFetch
 
 public class EffectsHandler<T : MviEffect>(
     @PublishedApi internal val unconsumedEffectsFlow: Flow<UniqueEffect<T>>,
     @PublishedApi internal val consume: suspend (UniqueEffect<T>) -> Unit,
 ) {
-    private var activeConsumers = AtomicInt(0)
+    private var _activeConsumers = MutableStateFlow(0)
+    public val activeConsumers: SharedFlow<Int> = _activeConsumers.asSharedFlow()
 
     @PublishedApi
     internal var activeSingleEffectConsumers: Set<KClass<out T>> =
@@ -40,8 +42,8 @@ public class EffectsHandler<T : MviEffect>(
         handler: suspend (T) -> Unit,
     ): Flow<T> {
         return unconsumedEffectsFlow
-            .onStart { activeConsumers.incrementAndFetch() }
-            .onCompletion { activeConsumers.decrementAndFetch() }
+            .onStart { _activeConsumers.update { it + 1 } }
+            .onCompletion { _activeConsumers.update { it - 1 } }
             .map { uniqueEffect ->
                 handleAndConsumeEffect(
                     uniqueEffect,
@@ -100,6 +102,6 @@ public class EffectsHandler<T : MviEffect>(
     }
 
     internal fun isEffectConsumerActive(effect: MviEffect): Boolean {
-        return activeConsumers.load() > 0 || activeSingleEffectConsumers.contains(effect::class)
+        return _activeConsumers.value > 0 || activeSingleEffectConsumers.contains(effect::class)
     }
 }

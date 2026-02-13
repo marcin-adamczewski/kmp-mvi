@@ -64,7 +64,12 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     private val actions = ActionsManager<Action>(scope, handleActionCalled)
 
     public val lifecycleManager: LifecycleManager =
-        LifecycleManager(subscribersCount, scope, logger)
+        LifecycleManager(
+            stateSubscriptionsCount = subscribersCount,
+            effectsSubscribersCount = effectsManager.effectsHandler.activeConsumers,
+            scope = scope,
+            logger = logger
+        )
 
     public val progress: ProgressManager = ProgressManager()
 

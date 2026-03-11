@@ -45,14 +45,14 @@ class SongsDslViewModelTest {
     }
 
     @Test
-    fun `when initialized, then fetched all songs`() = runTest {
+    fun `when initialized then fetched all songs`() = runTest {
         createSut().testState(this) {
             assertEquals(INIT_SONGS, expectMostRecentItem().songs)
         }
     }
 
     @Test
-    fun `when initialized, then show and hide loading`() = runTest {
+    fun `when initialized then show and hide loading`() = runTest {
         whenActionThenShowProgress(
             createSut(SongsFakeRepository(requestDelay = TEST_DELAY)),
             stateFieldToAssert = { it.isLoading }
@@ -60,7 +60,7 @@ class SongsDslViewModelTest {
     }
 
     @Test
-    fun `when songs request failed, then show error`() = runTest {
+    fun `when songs request failed then show error`() = runTest {
         val repository = SongsFakeRepository(
             initSongs = Result.failure(IllegalStateException("test")),
             requestDelay = TEST_DELAY
@@ -72,7 +72,7 @@ class SongsDslViewModelTest {
     }
 
     @Test
-    fun `when pulled to refresh, then refresh with loading`() = runTest {
+    fun `when pulled to refresh then refresh with loading`() = runTest {
         val repository = SongsFakeRepository(requestDelay = TEST_DELAY)
 
         whenActionThenShowProgress(
@@ -88,7 +88,7 @@ class SongsDslViewModelTest {
     }
 
     @Test
-    fun `when song clicked, then open song details`() = runTest {
+    fun `when song clicked then open song details`() = runTest {
         whenActionThenEffect(
             createSut(),
             actionToSubmit = SongsAction.SongSelected(INIT_SONGS[0]),
@@ -97,7 +97,7 @@ class SongsDslViewModelTest {
     }
 
     @Test
-    fun `when query changed, then search songs`() = runTest {
+    fun `when query changed then search songs`() = runTest {
         val repository = SongsFakeRepository()
         createSut(repository).testState(this) {
             assertEquals(1, repository.searchCount) // initial request
@@ -110,7 +110,7 @@ class SongsDslViewModelTest {
     }
 
     @Test
-    fun `when query changed rapidly, then debounce query and perform search once`() = runTest {
+    fun `when query changed rapidly then debounce query and perform search once`() = runTest {
         val repository = SongsFakeRepository()
         createSut(repository).testState(this) {
             assertEquals(1, repository.searchCount) // initial request

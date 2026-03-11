@@ -114,7 +114,7 @@ class SongsViewModel(
 
 #### Using Kotlin DSL
 
-You can use the `mvi` DSL to configure your component without overriding `handleActions`. This is available both when inheriting and when using the component as a property.
+You can use the `mvi` or `mviViewModel` DSL to configure your component without inheriting from MVI base classes and overriding `handleActions`. You have to implement `MviContainerHost` interface so UI can access the component's state and effects.
 
 ```kotlin
 class SongsViewModel(

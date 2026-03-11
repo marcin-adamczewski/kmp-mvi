@@ -5,14 +5,14 @@ A lightweight, flexible, and powerful MVI (Model-View-Intent) library for Kotlin
 ## Features
 
 - **Multiplatform**: Works on Android, iOS, JVM, Wasm, and Linux.
-- **Side Effects**: Robust handling of one-time events (effects) like navigation or toast messages.
+- **Effects**: Robust handling of one-time events like navigation or toast messages.
 - **Powerful UI actions handling**: Handle UI actions with power of Flow and Coroutines.
 - **ViewModel**: Optional integration with `androidx.lifecycle.ViewModel`.
 - **Progress Management**: Easy-to-use API for tracking loading states across multiple operations.
 - **Error Management**: Centralized error handling and propagation to the UI.
 - **Logging**: Built-in support for logging state transitions, actions, and effects.
 - **Lifecycle support**: Observe lifecycle events and react accordingly.
-- **Compose Support**: Dedicated extensions for state collection and effect handling in Jetpack and Multiplatform Compose.
+- **Compose Support**: Dedicated extensions for state collection and effect handling in Jetpack Compose.
 - **Test utils**: Helper functions for testing your MVI components with Turbine.
 
 ## Installation
@@ -63,7 +63,7 @@ sealed interface SongsAction : MviAction {
     data class SongSelected(val song: Song) : SongsAction
 }
 
-// Side effects that are emitted from the MviContainer and observed by the UI.
+// Effects that are emitted from the MviContainer and observed by the UI.
 // Usually those are navigation events, toast messages, etc.
 sealed interface SongsEffect : MviEffect {
     data class OpenSongDetails(val songId: String) : SongsEffect
@@ -71,9 +71,12 @@ sealed interface SongsEffect : MviEffect {
 }
 ```
 
-### 2. Create your ViewModel or MviStateManager
+### 2. Create your MviComponent
 
-Extend `MviViewModel` or `MviStateManager` and implement `handleActions()`.
+Extend `MviViewModel` or `MviStateManager` and implement `handleActions()`. 
+Alternatively, you can use the **Kotlin DSL** for a more concise configuration.
+
+#### Using Inheritance
 
 ```kotlin
 class SongsViewModel(
@@ -84,57 +87,69 @@ class SongsViewModel(
 ) {
 
     init {
-        // onInit is called once, when the first subscriber connects to the state.
-        // Use it for initilization or create an Init action and dispatch it manually whenever you want.
+        // onInit is called once, when the first subscriber connects to the state or effects.
         onInit { 
             // withProgress - Shows progress at the beggining of the block and hides it when completed 
             withProgress {
                 repository.fetchSongs()
                     // setState - Updates state based on the current state
                     .onSuccess { setState { copy(songs = it, error = null) } }
-                    .onError { errorManager.addError(it.toLongError()) }
             }
-        }
-
-        // Optional - Handle all errors in one place using ErrorManager
-        observeError(errorManager) { error ->
-            setState { copy(error = error) }
-        }
-
-        // Optional - Handle all loading events in one place using ProgressManager
-        observeProgress { isLoading ->
-            setState { copy(isLoading = isLoading) }
         }
     }
 
     override fun ActionsManager<SongsAction>.handleActions() {
-        // Instead of using onInit block, you can dispatch Init action manually whenever you want.
-        onActionSingle<Init> {
-            // Initialization logic here
-        }
-        
-        // When song was selected in UI, emit navigation effect OpenSongDetails
         onAction<SongSelected> {
-            analytics.trackSongSelected(it.song.id)
             setEffect { OpenSongDetails(it.song.id) }
         }
-        
-        // onActionFlow is very powerful and allows to act on UI actions using Flow transformers.
-        // In this example we debounce every search text change so the search doesn't run on every keystroke.
-        // This flow is automatically collected.
-        onActionFlow<SearchQueryChanged> { action ->
-            debounce(300)
-                .distinctUntilChanged()
-                .map { repository.searchSongs(action.query) }
-                .onSuccess { setState { copy(songs = it, error = null) } }
-                .onError { errorManager.addError(it.toLongError()) }
+
+        onActionFlow<SearchQueryChanged> {
+            debounce(300).map {
+                setState { copy(query = it) }
+            }
+        }
+    }
+}
+```
+
+#### Using Kotlin DSL
+
+You can use the `mvi` or `mviViewModel` DSL to configure your component without inheriting from MVI base classes and overriding `handleActions`. You have to implement `MviContainerHost` interface so UI can access the component's state and effects.
+
+```kotlin
+class SongsViewModel(
+    private val repository: MusicRepository
+) : ViewModel, MviContainerHost<SongsAction, SongsState, SongsEffect> {
+
+    override val component = mviViewModel<SongsAction, SongsState, SongsEffect>(SongsState()) {
+        onInit {
+            // withProgress - Shows progress at the beggining of the block and hides it when completed
+            withProgress {
+                repository.fetchSongs()
+                    // setState - Updates state based on the current state
+                    .onSuccess {
+                        setState { copy(songs = it, error = null) }
+                    }
+            }
+        }
+
+        actions {
+            onAction<SongSelected> { action ->
+                setEffect { OpenSongDetails(action.song.id) }
+            }
+
+            onActionFlow<SearchQueryChanged> {
+                debounce(300).map { 
+                    setState { copy(query = it) }
+                }
+            }
         }
     }
 }
 ```
 
 > **Note**: The library features a built-in lifecycle management system based on the number of active state and effects subscribers. You can react to lifecycle events using `onInit`, `onSubscribe`, and `onUnsubscribe` callbacks.
-> The lifecycle of the MVI component is automatically managed. E.g. when using `collectAsStateWithLifecycle()` or effects.consume {} in Compose, it will trigger `onInit` once and onSubscribe` when the screen enters the foreground and `onUnsubscribe` when it leaves, allowing for efficient resource management.
+> The lifecycle of the MVI component is automatically managed. E.g. when using `collectAsStateWithLifecycle()` or effects.consume {} in Compose, it will trigger `onInit` once, `onSubscribe` when the screen enters the foreground, and `onUnsubscribe` when it leaves, allowing for efficient resource management.
 
 ### 3. Use in Compose
 
@@ -147,7 +162,7 @@ fun SongsScreen(viewModel: SongsViewModel) {
     val state by viewModel.collectAsStateWithLifecycle()
     var searchQuery by rememberSavable { mutableStateOf("") }
 
-    // Handle one-time side effects
+    // Handle one-time events
     viewModel.ConsumeEffects { effect ->
         when (effect) {
             is SongsEffect.OpenSongDetails -> { /* navigate to details */ }
@@ -180,7 +195,25 @@ fun SongsScreen(viewModel: SongsViewModel) {
 You can pass viewmodel::submitAction function down the hierarchy to your child components. 
 That way you don't have to pass many event functions down the hierarchy.
 
-## Advanced Features
+### Logging
+
+Built-in support for logging to track all actions, state changes, effects, and lifecycle events in your console. This is extremely helpful for debugging complex state transitions and verifying behavior in both code and tests.
+You can also send logs to a remote service, like Crashlytics so it's much easier to understand why something crashed.
+
+Example log output:
+
+```text
+SongsViewModel@021ba2c6: [Initial State] - SongsState(isLoading=true, error=null, songs=null)
+SongsViewModel@021ba2c6: [Lifecycle] - onInit
+SongsViewModel@021ba2c6: [Lifecycle] - onSubscribe
+SongsViewModel@021ba2c6: [State] - SongsState(isLoading=false, error=null, songs=[Song(id=1, title=Midnight City, artistDisplayName=M83, releaseDate=2025-12-18)])
+SongsViewModel@021ba2c6: [Action] - SearchQueryChanged(query=Water)
+SongsViewModel@021ba2c6: [Action] - SongSelected(song=Song(id=13, title=Watermelon Sugar, artistDisplayName=Harry Styles, releaseDate=2025-12-18))
+SongsViewModel@021ba2c6: [Effect] - OpenSongDetails(songId=13)
+SongsViewModel@021ba2c6: [Lifecycle] - onUnsubscribe
+```
+
+Loggers can be configured via `MviConfig`.
 
 ### Progress Tracking
 
@@ -211,24 +244,6 @@ onActionFlow<Init> {
             setState { copy(songs = songs) }
         }
 }
-```
-
-### Logging
-
-Built-in support for logging to track all actions, state changes, effects, and lifecycle events in your console. This is extremely helpful for debugging complex state transitions and verifying behavior in both code and tests.
-You can also send logs to a remote service, like Crashlytics so it's much easier to understand why something crashed.
-
-Example log output:
-
-```text
-SongsViewModel@021ba2c6: [Initial State] - SongsState(isLoading=true, error=null, songs=null)
-SongsViewModel@021ba2c6: [Lifecycle] - onInit
-SongsViewModel@021ba2c6: [Lifecycle] - onSubscribe
-SongsViewModel@021ba2c6: [State] - SongsState(isLoading=false, error=null, songs=[Song(id=1, title=Midnight City, artistDisplayName=M83, releaseDate=2025-12-18)])
-SongsViewModel@021ba2c6: [Action] - SearchQueryChanged(query=Water)
-SongsViewModel@021ba2c6: [Action] - SongSelected(song=Song(id=13, title=Watermelon Sugar, artistDisplayName=Harry Styles, releaseDate=2025-12-18))
-SongsViewModel@021ba2c6: [Effect] - OpenSongDetails(songId=13)
-SongsViewModel@021ba2c6: [Lifecycle] - onUnsubscribe
 ```
 
 ## License

@@ -28,11 +28,11 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 public typealias MviContainer<A, S, E> = BaseMviContainer<A, S, E, Nothing>
 
-public class BaseMviContainer<Action : MviAction, State: MviState, Effects : MviEffect, Message: MviMessage>(
+public class BaseMviContainer<Action : MviAction, State : MviState, Effects : MviEffect, Message : MviMessage>(
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,
-) : MviComponent<Action, State, Effects> {
+) : MviComponent<Action, State, Effects>, Closeable {
     private val handleActionCalled = CompletableDeferred<Unit>()
 
     private val logger: MviLogger by lazy {
@@ -78,9 +78,7 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     public val lifecycle: StateFlow<MviLifecycle> = lifecycleManager.lifecycle
 
     init {
-        scope.launch {
-            initLogger(initialState)
-        }
+        initLogger(initialState)
     }
 
     public fun handleActions(block: ActionsManager<Action>.() -> Unit) {
@@ -147,6 +145,10 @@ public class BaseMviContainer<Action : MviAction, State: MviState, Effects : Mvi
     public fun clear() {
         logger.onClear()
         scope.cancel()
+    }
+
+    override fun close() {
+        clear()
     }
 
     private fun initLogger(initialState: State) {

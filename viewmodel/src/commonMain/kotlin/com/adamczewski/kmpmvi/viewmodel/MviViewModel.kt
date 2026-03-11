@@ -16,7 +16,7 @@ import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.actions.ActionsManager
-import com.adamczewski.kmpmvi.mvi.utils.defaultSettings
+import com.adamczewski.kmpmvi.mvi.utils.defaultMviSettings
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.MviError
@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 public typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, Nothing>
 
-public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
+public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -56,7 +56,7 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
 
     override val effects: EffectsHandler<Effect> = container.effects
 
-    public val progress: ProgressManager = container.progress
+    protected val progress: ProgressManager = container.progress
 
     public val messages: Flow<Message> = container.messenger.messages
 
@@ -87,10 +87,10 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
      * It's recommended to call only methods from provided [ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
-    protected abstract fun ActionsManager<Action>.handleActions()
+    open protected fun ActionsManager<Action>.handleActions() {}
 
     open protected fun settings(): MviSettings {
-        return defaultSettings()
+        return defaultMviSettings()
     }
 
     @EmptySuper

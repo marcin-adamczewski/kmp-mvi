@@ -44,7 +44,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `when action submitted, then action hanlded and state updated`() = runTest {
+    fun `when action submitted then action hanlded and state updated`() = runTest {
         val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
             actions {
                 onAction<TestAction.UpdateValue> { action ->
@@ -61,7 +61,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `given single action, when action submitted, then action hanlded and state updated once`() =
+    fun `given single action when action submitted then action hanlded and state updated once`() =
         runTest {
             val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
                 actions {
@@ -82,7 +82,7 @@ class MviDslTest {
         }
 
     @Test
-    fun `given flow action, when action submitted, then action hanlded and state updated`() =
+    fun `given flow action when action submitted then action hanlded and state updated`() =
         runTest {
             val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
                 actions {
@@ -103,7 +103,7 @@ class MviDslTest {
         }
 
     @Test
-    fun `given flow single action, when action submitted, then action hanlded and state updated once`() =
+    fun `given flow single action when action submitted then action hanlded and state updated once`() =
         runTest {
             val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
                 actions {
@@ -126,7 +126,7 @@ class MviDslTest {
         }
 
     @Test
-    fun `when action handled, then effect emitted from action handler`() = runTest {
+    fun `when action handled then effect emitted from action handler`() = runTest {
         val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
             actions {
                 onAction<TestAction.EmitEffect> {
@@ -143,7 +143,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `when action with progress, then observing progress updates progress`() = runTest {
+    fun `when action with progress then observing progress updates progress`() = runTest {
         val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
             observeProgress { isLoading ->
                 setState { copy(isLoading = isLoading) }
@@ -175,7 +175,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `when flow action with progress, then observing progress updates progress`() = runTest {
+    fun `when flow action with progress then observing progress updates progress`() = runTest {
         val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
             observeProgress { isLoading ->
                 setState { copy(isLoading = isLoading) }
@@ -209,7 +209,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `when lifecycleState subscribed then, onInit callback called`() = runTest {
+    fun `when lifecycleState subscribed then onInit callback called`() = runTest {
         var onInitCalled = false
         val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
             onInit {
@@ -226,7 +226,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `when observableState subscribed then, onInit callback not called`() = runTest {
+    fun `when observableState subscribed then onInit callback not called`() = runTest {
         var onInitCalled = false
         val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
             onInit {
@@ -242,7 +242,7 @@ class MviDslTest {
     }
 
     @Test
-    fun `given error observed, when error emitted, then error updated in state`() = runTest {
+    fun `given error observed when error emitted then error updated in state`() = runTest {
         val errorManager = ErrorManager()
         val error = Throwable("test").toUiError(LONG_ERROR_DURATION)
 

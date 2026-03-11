@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 public typealias MviViewModel<A, S, E> = BaseMviViewModel<A, S, E, Nothing>
 
-public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
+public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
@@ -87,7 +87,7 @@ public abstract class BaseMviViewModel<Action : MviAction, State : MviState, Eff
      * It's recommended to call only methods from provided [ActionsManager] in this method.
      * Other methods should be called within actions handling functions.
      */
-    protected abstract fun ActionsManager<Action>.handleActions()
+    open protected fun ActionsManager<Action>.handleActions() {}
 
     open protected fun settings(): MviSettings {
         return defaultMviSettings()

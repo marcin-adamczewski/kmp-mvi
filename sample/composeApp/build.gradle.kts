@@ -17,12 +17,14 @@ kotlin {
         }
     }
 
+    jvm("desktop")
+
     listOf(
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+    ).forEach { appleTarget ->
+        appleTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -57,6 +59,12 @@ kotlin {
             implementation(sampleLibs.androidx.activity.compose)
         }
         iosMain.dependencies {
+        }
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.coroutines.swing)
+            }
         }
         wasmJsMain.dependencies {
             implementation(compose.ui)
@@ -119,4 +127,20 @@ android {
 
 dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+
+compose.desktop {
+    application {
+        mainClass = "com.adamczewski.sample.MainKt"
+        nativeDistributions {
+            targetFormats(
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+            )
+            packageName = "com.adamczewski.sample"
+            packageVersion = "1.0.0"
+        }
+    }
 }

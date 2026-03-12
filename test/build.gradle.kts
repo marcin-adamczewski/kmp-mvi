@@ -11,6 +11,9 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+    mingwX64()
     linuxX64()
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {

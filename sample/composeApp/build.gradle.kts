@@ -38,6 +38,15 @@ kotlin {
         binaries.executable()
     }
 
+    js {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
+        binaries.executable()
+    }
+
     sourceSets {
         all {
             languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
@@ -50,6 +59,9 @@ kotlin {
         iosMain.dependencies {
         }
         wasmJsMain.dependencies {
+            implementation(compose.ui)
+        }
+        jsMain.dependencies {
             implementation(compose.ui)
         }
         commonMain.dependencies {

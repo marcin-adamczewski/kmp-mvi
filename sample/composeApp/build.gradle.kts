@@ -17,7 +17,12 @@ kotlin {
         }
     }
 
-    jvm("desktop")
+    jvm("desktop") {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        mainRun {
+            mainClass.set("com.adamczewski.sample.MainKt")
+        }
+    }
 
     listOf(
         iosX64(),

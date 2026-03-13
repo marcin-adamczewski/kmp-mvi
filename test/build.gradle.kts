@@ -1,37 +1,18 @@
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
+    id(libs.plugins.kotlinMultiplatform.get().pluginId)
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
 kotlin {
-    explicitApi()
-
-    jvm()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    macosX64()
-    macosArm64()
-    mingwX64()
-    linuxX64()
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-    js {
-        browser()
-        binaries.executable()
-    }
+    configureMultiplatform(
+        ext = this,
+    )
 
     sourceSets {
-        all {
-            languageSettings.optIn("kotlin.concurrent.atomics.ExperimentalAtomicApi")
-            languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-            languageSettings.optIn("kotlinx.coroutines.FlowPreview")
-        }
-
         commonMain.dependencies {
             implementation(libs.coroutines.core)
             implementation(libs.coroutines.test)

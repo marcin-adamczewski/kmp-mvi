@@ -3,7 +3,7 @@ android-compileSdk = "36"
 android-minSdk = "21"
 androidx-ui-tooling = "1.7.8"
 androidx-viewmodel = "2.10.0"
-agp = "8.13.0"
+agp = "8.13.1"
 compose-multiplatform = "1.9.3"
 coroutines = "1.10.2"
 junit = "5.9.3"
@@ -12,6 +12,7 @@ lifecycleCompose = "2.9.1"
 vanniktechMavenPublish = "0.35.0"
 
 [libraries]
+android-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-viewmodel" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androidx-ui-tooling" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -20,6 +21,7 @@ coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", 
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 turbine = "app.cash.turbine:turbine:1.2.1"

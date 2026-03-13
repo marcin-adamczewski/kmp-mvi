@@ -47,7 +47,7 @@ fun Project.configureMultiplatform(
             minSdk = libs.findVersion("android-minSdk").get().requiredVersion.toInt()
             withJava()
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_11)
+                jvmTarget.set(JvmTarget.JVM_17)
             }
             packaging {
                 resources {

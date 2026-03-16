@@ -44,8 +44,14 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew allTests
 
-      - name: Build Sample App
-        run: ./gradlew :sample:composeApp:assembleDebug :sample:composeApp:wasmJsBrowserDistribution
+      - name: Assemble Sample App
+        run: >
+          ./gradlew 
+          :sample:composeApp:assembleDebug
+          :sample:composeApp:packageDistributionForCurrentOS 
+          :sample:composeApp:jsBrowserDevelopmentWebpack 
+          :sample:composeApp:wasmJsBrowserDevelopmentWebpack 
+          :sample:composeApp:linkDebugFrameworkIosArm64 
 
       - name: Upload Test Reports
         if: failure()

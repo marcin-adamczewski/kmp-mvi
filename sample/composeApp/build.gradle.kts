@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(sampleLibs.plugins.androidApplication)
+    id(libs.plugins.kotlinMultiplatform.get().pluginId)
+    id(sampleLibs.plugins.androidApplication.get().pluginId)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinxSerialization)
@@ -13,7 +13,14 @@ kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
+    jvm("desktop") {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        mainRun {
+            mainClass.set("com.adamczewski.sample.MainKt")
         }
     }
 
@@ -21,8 +28,8 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+    ).forEach { appleTarget ->
+        appleTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -30,6 +37,15 @@ kotlin {
 
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    js {
         browser {
             commonWebpackConfig {
                 outputFileName = "composeApp.js"
@@ -49,7 +65,16 @@ kotlin {
         }
         iosMain.dependencies {
         }
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.coroutines.swing)
+            }
+        }
         wasmJsMain.dependencies {
+            implementation(compose.ui)
+        }
+        jsMain.dependencies {
             implementation(compose.ui)
         }
         commonMain.dependencies {
@@ -96,15 +121,31 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+
+compose.desktop {
+    application {
+        mainClass = "com.adamczewski.sample.MainKt"
+        nativeDistributions {
+            targetFormats(
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+            )
+            packageName = "com.adamczewski.sample"
+            packageVersion = "1.0.0"
+        }
+    }
 }

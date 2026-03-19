@@ -152,7 +152,7 @@ public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *, *>> 
 public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *, *>> TestScope.whenActionThenShowProgress(
     stateComponent: VM,
     stateFieldToAssert: (S) -> Boolean,
-    beforeActionBlock: (StateManagerFlowTurbine<S, A>.() -> Unit)? = null,
+    beforeActionBlock: (suspend StateManagerFlowTurbine<S, A>.() -> Unit)? = null,
     actionToSubmit: A? = null,
 ) {
     stateComponent.testState(this) {

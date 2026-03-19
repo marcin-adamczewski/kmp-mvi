@@ -53,6 +53,8 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
 
     protected val progress: ProgressManager = container.progress
 
+    public val progressObservable: ProgressObservable = progress
+
     public val messages: Flow<Message> = container.messenger.messages
 
     public val lifecycle: StateFlow<MviLifecycle> = container.lifecycle

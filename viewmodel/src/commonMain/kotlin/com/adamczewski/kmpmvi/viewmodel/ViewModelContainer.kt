@@ -8,6 +8,7 @@ import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 public typealias ViewModelContainer<A, S, E> = BaseViewModelContainer<A, S, E, Nothing>
@@ -36,6 +37,9 @@ public abstract class AbstractViewModelContainer<Action : MviAction, State : Mvi
 
     override val effects: EffectsHandler<Effect>
         get() = container.effects
+
+    override val messages: Flow<Message>
+        get() = container.messages
 
     override fun submitAction(action: Action) {
         container.submitAction(action)

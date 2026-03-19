@@ -34,7 +34,7 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
-) : ViewModel(), MviComponent<Action, State, Effect>, LifecycleAware {
+) : ViewModel(), MviComponent<Action, State, Effect, Message>, LifecycleAware {
 
     private val closeables = mutableListOf(*closeables)
 
@@ -60,7 +60,7 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
 
     public val progressObservable: ProgressObservable = progress
 
-    public val messages: Flow<Message> = container.messenger.messages
+    public override val messages: Flow<Message> = container.messenger.messages
 
     public val lifecycle: StateFlow<MviLifecycle> = container.lifecycle
 

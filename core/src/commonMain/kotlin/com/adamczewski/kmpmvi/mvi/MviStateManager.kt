@@ -27,7 +27,7 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
     initialState: State,
     settings: MviSettings? = null,
     vararg closeables: Closeable = arrayOf(),
-) : Closeable, MviComponent<Action, State, Effect>, LifecycleAware {
+) : Closeable, MviComponent<Action, State, Effect, Message>, LifecycleAware {
     private val closeables = mutableListOf(*closeables)
 
     @PublishedApi
@@ -55,7 +55,7 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
 
     public val progressObservable: ProgressObservable = progress
 
-    public val messages: Flow<Message> = container.messenger.messages
+    public override val messages: Flow<Message> = container.messenger.messages
 
     public val lifecycle: StateFlow<MviLifecycle> = container.lifecycle
 

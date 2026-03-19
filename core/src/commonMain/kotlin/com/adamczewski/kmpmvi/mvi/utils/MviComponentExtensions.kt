@@ -4,6 +4,7 @@ import com.adamczewski.kmpmvi.mvi.MviConfig
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.mvi.settings.MviSettingsBuilder
@@ -17,6 +18,6 @@ public fun <T: Any> T.defaultMviSettings(
     return MviConfig.settingsProvider.provide(tag, klass)
 }
 
-public fun MviComponent<out MviAction, out MviState, out MviEffect>.buildSettings(
+public fun MviComponent<out MviAction, out MviState, out MviEffect, out MviMessage>.buildSettings(
     block: MviSettingsBuilder.() -> Unit
 ): MviSettings = buildMviSettings(defaultMviSettings(), block)

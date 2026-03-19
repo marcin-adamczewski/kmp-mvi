@@ -5,9 +5,11 @@ import com.adamczewski.kmpmvi.mvi.actions.ActionNotSubscribedException
 import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.test.testEffects
+import com.adamczewski.kmpmvi.test.testMessages
 import com.adamczewski.kmpmvi.test.testState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -47,10 +49,10 @@ class MviContainerTest {
         effectsBufferSize: Int = 10,
         exceptionHandler: CoroutineExceptionHandler? = null,
         scope: CoroutineScope? = null,
-    ): MviContainer<TestAction, TestState, TestEffect> {
+    ): BaseMviContainer<TestAction, TestState, TestEffect, TestMessage> {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
-        return MviContainer<TestAction, TestState, TestEffect>(
+        return BaseMviContainer<TestAction, TestState, TestEffect, TestMessage>(
             scopeProvider = { scope ?: scopeProvider() },
             initialState = initialState,
             settings = MviSettings(
@@ -495,6 +497,33 @@ class MviContainerTest {
                 expectNoEvents()
             }
         }
+
+    @Test
+    fun `Messages - given observing messages when messages emitted then messages received`() = runTest {
+        val sut = createSut()
+        sut.testMessages(this) {
+            sut.messenger.setMessage(TestMessage.InitializedMessage)
+            sut.messenger.setMessage(TestMessage.InitializedMessage)
+            sut.messenger.setMessage(TestMessage.DataMessage("123"))
+
+            assertEquals(TestMessage.InitializedMessage, awaitItem())
+            assertEquals(TestMessage.InitializedMessage, awaitItem())
+            assertEquals(TestMessage.DataMessage("123"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `Messages - when observing messages after first message emitted then first message not received`() = runTest {
+        val sut = createSut()
+        sut.messenger.setMessage(TestMessage.InitializedMessage)
+        sut.testMessages(this) {
+            sut.messenger.setMessage(TestMessage.DataMessage("1"))
+            sut.messenger.setMessage(TestMessage.DataMessage("2"))
+
+            assertEquals(TestMessage.DataMessage("1"), awaitItem())
+            assertEquals(TestMessage.DataMessage("2"), awaitItem())
+        }
+    }
 
     @Test
     fun `ExceptionHandler - given exception handler when unhandled error in onActionSingle then notify exception handler`() =
@@ -1056,9 +1085,14 @@ class MviContainerTest {
         val refreshed: Boolean = false
     ) : MviState
 
-    private sealed class SealedTestState() : MviState {
-        data object Loading : SealedTestState()
-        data object Error : SealedTestState()
-        data class Data(val id: String) : SealedTestState()
+    private sealed interface SealedTestState : MviState {
+        data object Loading : SealedTestState
+        data object Error : SealedTestState
+        data class Data(val id: String) : SealedTestState
+    }
+
+    private sealed interface TestMessage : MviMessage {
+        data object InitializedMessage : TestMessage
+        data class DataMessage(val data: String) : TestMessage
     }
 }

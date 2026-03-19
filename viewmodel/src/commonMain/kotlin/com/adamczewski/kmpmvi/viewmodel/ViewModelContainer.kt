@@ -15,12 +15,12 @@ public typealias ViewModelContainer<A, S, E> = BaseViewModelContainer<A, S, E, N
 public open class BaseViewModelContainer<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage>(
     private val container: BaseMviStateManager<Action, State, Effect, Message>,
 ) : ViewModel(AutoCloseable { container.close() }),
-    MviComponent<Action, State, Effect> by container
+    MviComponent<Action, State, Effect, Message> by container
 
 public typealias SimpleViewModelContainer<A, S, E> = AbstractViewModelContainer<A, S, E, Nothing>
 
 public abstract class AbstractViewModelContainer<Action : MviAction, State : MviState, Effect : MviEffect, Message: MviMessage> :
-    ViewModel(), MviComponent<Action, State, Effect> {
+    ViewModel(), MviComponent<Action, State, Effect, Message> {
 
     public abstract val container: BaseMviStateManager<Action, State, Effect, Message>
 

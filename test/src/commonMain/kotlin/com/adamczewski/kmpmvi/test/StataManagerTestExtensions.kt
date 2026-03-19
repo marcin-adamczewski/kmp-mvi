@@ -2,16 +2,18 @@ package com.adamczewski.kmpmvi.test
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
+import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.MviComponent
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 
 public class StateManagerFlowTurbine<T, A : MviAction>(
     private val testFlow: ReceiveTurbine<T>,
-    private val mviComponent: MviComponent<A, *, *>,
+    private val mviComponent: MviComponent<A, *, *, *>,
     private val testScope: TestScope,
 ) : ReceiveTurbine<T> by testFlow {
 
@@ -25,7 +27,7 @@ public class StateManagerFlowTurbine<T, A : MviAction>(
     }
 }
 
-public suspend fun <E : MviEffect, A : MviAction> MviComponent<A, *, E>.testEffects(
+public suspend fun <E : MviEffect, A : MviAction> MviComponent<A, *, E, *>.testEffects(
     scope: TestScope,
     validate: suspend StateManagerFlowTurbine<E, A>.() -> Unit,
 ) {
@@ -34,11 +36,20 @@ public suspend fun <E : MviEffect, A : MviAction> MviComponent<A, *, E>.testEffe
     }
 }
 
-public suspend fun <S: MviState, A : MviAction> MviComponent<A, S, *>.testState(
+public suspend fun <S: MviState, A : MviAction> MviComponent<A, S, *, *>.testState(
     scope: TestScope,
     validate: suspend StateManagerFlowTurbine<S, A>.() -> Unit,
 ) {
     lifecycleState.test {
         StateManagerFlowTurbine(this, this@testState, scope).validate()
+    }
+}
+
+public suspend fun <M : MviMessage, A : MviAction> MviComponent<A, *, *, M>.testMessages(
+    scope: TestScope,
+    validate: suspend StateManagerFlowTurbine<M, A>.() -> Unit,
+) {
+    messages.test {
+        StateManagerFlowTurbine(this, this@testMessages, scope).validate()
     }
 }

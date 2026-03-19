@@ -11,7 +11,7 @@ import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 
 @Composable
-public fun <E : MviEffect> MviComponent<*, *, E>.ConsumeEffects(
+public fun <E : MviEffect> MviComponent<*, *, E, *>.ConsumeEffects(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     handler: suspend (E) -> Unit,

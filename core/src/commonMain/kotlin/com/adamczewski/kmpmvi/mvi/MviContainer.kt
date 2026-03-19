@@ -21,6 +21,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ public class BaseMviContainer<Action : MviAction, State : MviState, Effects : Mv
     scopeProvider: () -> CoroutineScope,
     initialState: State,
     @PublishedApi internal val settings: MviSettings,
-) : MviComponent<Action, State, Effects>, Closeable {
+) : MviComponent<Action, State, Effects, Message>, Closeable {
     private val handleActionCalled = CompletableDeferred<Unit>()
 
     private val logger: MviLogger by lazy {
@@ -74,6 +75,8 @@ public class BaseMviContainer<Action : MviAction, State : MviState, Effects : Mv
     public val progress: ProgressManager = ProgressManager()
 
     public val messenger: Messenger<Message> = Messenger<Message>(scope)
+
+    public override val messages: SharedFlow<Message> = messenger.messages
 
     public val lifecycle: StateFlow<MviLifecycle> = lifecycleManager.lifecycle
 

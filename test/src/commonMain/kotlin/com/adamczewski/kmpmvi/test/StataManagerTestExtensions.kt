@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.MviComponent
+import com.adamczewski.kmpmvi.mvi.model.MviState
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 
@@ -33,7 +34,7 @@ public suspend fun <E : MviEffect, A : MviAction> MviComponent<A, *, E>.testEffe
     }
 }
 
-public suspend fun <S, A : MviAction> MviComponent<A, S, *>.testState(
+public suspend fun <S: MviState, A : MviAction> MviComponent<A, S, *>.testState(
     scope: TestScope,
     validate: suspend StateManagerFlowTurbine<S, A>.() -> Unit,
 ) {

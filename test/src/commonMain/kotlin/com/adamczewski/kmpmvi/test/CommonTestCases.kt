@@ -5,6 +5,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.MviComponent
 import com.adamczewski.kmpmvi.mvi.error.LONG_ERROR_DURATION
 import com.adamczewski.kmpmvi.mvi.error.UiError
+import com.adamczewski.kmpmvi.mvi.model.MviState
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -113,7 +114,7 @@ public suspend fun <A : MviAction, E : MviEffect, VM : MviComponent<A, *, E>> Te
     }
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenTextChangedThenUpdateState(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenTextChangedThenUpdateState(
     stateComponent: VM,
     actionToSubmit: (String) -> A,
     stateFieldToAssert: (S) -> String?,
@@ -129,7 +130,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     }
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenCheckboxCheckedThenUpdateState(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenCheckboxCheckedThenUpdateState(
     stateComponent: VM,
     actionToSubmit: (Boolean) -> A,
     stateFieldToAssert: (S) -> Boolean,
@@ -148,7 +149,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     }
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowProgress(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowProgress(
     stateComponent: VM,
     stateFieldToAssert: (S) -> Boolean,
     beforeActionBlock: (StateManagerFlowTurbine<S, A>.() -> Unit)? = null,
@@ -170,7 +171,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     }
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenActionThenHideProgress(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenActionThenHideProgress(
     stateComponent: VM,
     stateFieldToAssert: (S) -> Boolean,
     actionToSubmit: A,
@@ -184,7 +185,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     }
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowError(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     actionToSubmit: A,
@@ -200,7 +201,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     )
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowError(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     actionToSubmit: A,
@@ -215,7 +216,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
         errorTypeAssertion = { it == expectedError })
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenInitThenShowError(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenInitThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     fetchDelay: Long = TEST_DELAY,
@@ -231,7 +232,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     )
 }
 
-public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowError(
+public suspend fun <A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.whenActionThenShowError(
     stateComponent: VM,
     errorFieldProducer: (S) -> UiError?,
     actionBlock: suspend StateManagerFlowTurbine<S, A>.() -> Unit,
@@ -254,7 +255,7 @@ public suspend fun <A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.when
     }
 }
 
-public suspend fun <T, A : MviAction, S, VM : MviComponent<A, S, *>> TestScope.testItemToggled(
+public suspend fun <T, A : MviAction, S : MviState, VM : MviComponent<A, S, *>> TestScope.testItemToggled(
     stateComponent: VM,
     itemsCollection: (S) -> Set<T>,
     toggledItem: T,

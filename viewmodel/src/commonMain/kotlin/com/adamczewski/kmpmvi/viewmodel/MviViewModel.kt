@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
 import com.adamczewski.kmpmvi.mvi.BaseMviStateManager
 import com.adamczewski.kmpmvi.mvi.Closeable
-import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.model.MviState
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
@@ -168,20 +167,20 @@ public open class BaseMviViewModel<Action : MviAction, State : MviState, Effect 
 
     protected fun observeProgress(
         vararg progressObservables: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
-        container.observeProgress(CombinedProgressPublisher(*progressObservables), block)
+        container.observeProgress(progressObservables = progressObservables, block)
     }
 
     protected fun observeProgress(
         progressObservable: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
         container.observeProgress(progressObservable, block)
     }
 
     protected fun observeProgress(
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
         container.observeProgress(block)
     }

@@ -12,7 +12,6 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
-import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
@@ -162,20 +161,20 @@ public open class BaseMviStateManager<Action : MviAction, State : MviState, Effe
 
     protected fun observeProgress(
         vararg progressObservables: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
-        container.observeProgress(CombinedProgressPublisher(*progressObservables), block)
+        container.observeProgress(progressObservables = progressObservables, block)
     }
 
     protected fun observeProgress(
         progressObservable: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
         container.observeProgress(progressObservable, block)
     }
 
     protected fun observeProgress(
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
         container.observeProgress(block)
     }

@@ -1,7 +1,6 @@
 package com.adamczewski.kmpmvi.mvi.dsl
 
 import com.adamczewski.kmpmvi.mvi.BaseMviContainer
-import com.adamczewski.kmpmvi.mvi.effects.EffectsHandler
 import com.adamczewski.kmpmvi.mvi.error.BaseErrorManager
 import com.adamczewski.kmpmvi.mvi.error.MviError
 import com.adamczewski.kmpmvi.mvi.error.observeError
@@ -9,9 +8,9 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
+import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
 
 public class RootScope<Action : MviAction, State : MviState, Effect : MviEffect, Message : MviMessage>(
     container: BaseMviContainer<Action, State, Effect, Message>
@@ -43,13 +42,20 @@ public class RootScope<Action : MviAction, State : MviState, Effect : MviEffect,
     }
 
     public fun observeProgress(
+        vararg progressObservables: ProgressObservable,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
+    ) {
+        container.observeProgress(progressObservables = progressObservables, block)
+    }
+
+    public fun observeProgress(
         progressObservable: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit
     ) {
         container.observeProgress(progressObservable, block)
     }
 
-    public fun observeProgress(block: suspend CoroutineScope.(showProgress: Boolean) -> Unit) {
+    public fun observeProgress(block: suspend CoroutineScope.(isLoading: Boolean) -> Unit) {
         container.observeProgress(block)
     }
 }

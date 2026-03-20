@@ -12,6 +12,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
+import com.adamczewski.kmpmvi.mvi.progress.CombinedProgressPublisher
 import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.progress.ProgressObservable
 import com.adamczewski.kmpmvi.mvi.progress.withProgress
@@ -126,17 +127,24 @@ public class BaseMviContainer<Action : MviAction, State : MviState, Effects : Mv
     }
 
     public fun observeProgress(
+        vararg progressObservables: ProgressObservable,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
+    ) {
+        observeProgress(CombinedProgressPublisher(*progressObservables), block)
+    }
+
+    public fun observeProgress(
         progressObservable: ProgressObservable,
-        block: suspend CoroutineScope.(showProgress: Boolean) -> Unit,
+        block: suspend CoroutineScope.(isLoading: Boolean) -> Unit,
     ) {
         scope.launch {
-            progressObservable.isLoading.collect { showProgress ->
-                block(showProgress)
+            progressObservable.isLoading.collect { isLoading ->
+                block(isLoading)
             }
         }
     }
 
-    public fun observeProgress(block: suspend CoroutineScope.(showProgress: Boolean) -> Unit): Unit =
+    public fun observeProgress(block: suspend CoroutineScope.(isLoading: Boolean) -> Unit): Unit =
         observeProgress(progress, block)
 
     public suspend fun <T> withProgress(

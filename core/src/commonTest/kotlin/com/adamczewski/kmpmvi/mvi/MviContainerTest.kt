@@ -7,6 +7,7 @@ import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
 import com.adamczewski.kmpmvi.mvi.model.MviMessage
 import com.adamczewski.kmpmvi.mvi.model.MviState
+import com.adamczewski.kmpmvi.mvi.progress.ProgressManager
 import com.adamczewski.kmpmvi.mvi.settings.MviSettings
 import com.adamczewski.kmpmvi.test.testEffects
 import com.adamczewski.kmpmvi.test.testMessages
@@ -33,6 +34,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MviContainerTest {
@@ -1058,6 +1060,94 @@ class MviContainerTest {
                 assertEquals(0, awaitItem())
                 assertEquals(1, unsubscribeCount)
             }
+        }
+
+    @Test
+    fun `Progress - when observing progress then initially no value is returned`() =
+        runTest {
+            var valueEmitted: Boolean = false
+            val sut = createSut()
+            sut.observeProgress { isLoading ->
+                valueEmitted = true
+            }
+
+            advanceUntilIdle()
+            assertFalse { valueEmitted }
+        }
+
+    @Test
+    fun `Progress - when observing mutliple progresses then initially no value is returned`() =
+        runTest {
+            var valueEmitted: Boolean = false
+            val sut = createSut()
+            val progress2 = ProgressManager()
+            sut.observeProgress(sut.progress, progress2) { isLoading ->
+                valueEmitted = true
+            }
+
+            advanceUntilIdle()
+            assertFalse { valueEmitted }
+        }
+
+    @Test
+    fun `Progress - given observing progress when progress changed then progress updateds received`() =
+        runTest {
+            var loadingState = false
+            val sut = createSut()
+            sut.observeProgress { isLoading ->
+                loadingState = isLoading
+            }
+
+            sut.progress.addProgress("id1")
+            advanceUntilIdle()
+
+            assertTrue(loadingState)
+
+            sut.progress.addProgress("id2")
+            advanceUntilIdle()
+
+            assertTrue(loadingState)
+
+            sut.progress.removeProgress("id1")
+            advanceUntilIdle()
+
+            assertTrue(loadingState)
+
+            sut.progress.removeProgress("id2")
+            advanceUntilIdle()
+
+            assertFalse(loadingState)
+        }
+
+    @Test
+    fun `Progress - given observing multiple progresses when progress changed then combined progress states updateds received`() =
+        runTest {
+            var loadingState = false
+            val sut = createSut()
+            val progress2 = ProgressManager()
+            sut.observeProgress(sut.progress, progress2) { isLoading ->
+                loadingState = isLoading
+            }
+
+            sut.progress.addProgress("id1")
+            advanceUntilIdle()
+
+            assertTrue(loadingState)
+
+            progress2.addProgress("id1")
+            advanceUntilIdle()
+
+            assertTrue(loadingState)
+
+            sut.progress.removeProgress("id1")
+            advanceUntilIdle()
+
+            assertTrue(loadingState)
+
+            progress2.removeProgress("id1")
+            advanceUntilIdle()
+
+            assertFalse(loadingState)
         }
 
     @Test

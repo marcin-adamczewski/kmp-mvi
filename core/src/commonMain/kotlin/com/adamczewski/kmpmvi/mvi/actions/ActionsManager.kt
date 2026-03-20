@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
@@ -74,19 +77,38 @@ public class ActionsManager<Action : MviAction>(
         actionClass: KClass<T>,
         transformer: suspend Flow<T>.() -> Flow<*>,
     ) {
-        val isCollected = CompletableDeferred<Unit>()
-        collectedActions.add(isCollected)
+        val isReadyToReceiveActions = CompletableDeferred<Unit>()
+        collectedActions.add(isReadyToReceiveActions) // submitAction waits for this
 
         scope.launch {
-            actions
-                .filterIsInstance(actionClass)
-                .onStart { isCollected.complete(Unit) }
-                .transformer()
-                .collect {
-                    if (!isCollected.isCompleted) {
-                        throw ActionNotSubscribedException(actionClass)
+            val actionChannel = Channel<T>(Channel.BUFFERED)
+            launch {
+                actions
+                    .filterIsInstance(actionClass)
+                    .onStart {
+                        // Signal that we are now buffering actions (unblocks submitAction)
+                        isReadyToReceiveActions.complete(Unit)
                     }
+                    .collect { actionChannel.send(it) }
+            }
+
+            // Wait for the first action. This suspension point
+            // allows the MVI subclasses initialization to finish safely.
+            val firstAction = actionChannel.receive()
+
+            // This ensures that transformer was called on the receiver flow of onAction method.
+            val isActionsSourceCollected = CompletableDeferred<Unit>()
+
+            val actionsSource = flow {
+                emit(firstAction)
+                emitAll(actionChannel.receiveAsFlow())
+            }.onStart { isActionsSourceCollected.complete(Unit) }
+
+            actionsSource.transformer().collect {
+                if (!isActionsSourceCollected.isCompleted) {
+                    throw ActionNotSubscribedException(actionClass)
                 }
+            }
         }
     }
 }

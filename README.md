@@ -35,7 +35,9 @@ kotlin {
             
             // Compose Multiplatform extensions
             implementation("io.github.marcin-adamczewski:compose:[libVersion]")
+        }
 
+        commonTest.dependencies {
             // Test utils
             implementation("io.github.marcin-adamczewski:test:[libVersion]")
         }
@@ -89,7 +91,7 @@ class SongsViewModel(
     init {
         // onInit is called once, when the first subscriber connects to the state or effects.
         onInit { 
-            // withProgress - Shows progress at the beggining of the block and hides it when completed 
+            // withProgress - Shows progress at the beginning of the block and hides it when completed 
             withProgress {
                 repository.fetchSongs()
                     // setState - Updates state based on the current state
@@ -123,7 +125,7 @@ class SongsViewModel(
 
     override val component = mviViewModel<SongsAction, SongsState, SongsEffect>(SongsState()) {
         onInit {
-            // withProgress - Shows progress at the beggining of the block and hides it when completed
+            // withProgress - Shows progress at the beginning of the block and hides it when completed
             withProgress {
                 repository.fetchSongs()
                     // setState - Updates state based on the current state
@@ -195,7 +197,7 @@ fun SongsScreen(viewModel: SongsViewModel) {
 You can pass viewmodel::submitAction function down the hierarchy to your child components. 
 That way you don't have to pass many event functions down the hierarchy.
 
-### Logging
+## Logging
 
 Built-in support for logging to track all actions, state changes, effects, and lifecycle events in your console. This is extremely helpful for debugging complex state transitions and verifying behavior in both code and tests.
 You can also send logs to a remote service, like Crashlytics so it's much easier to understand why something crashed.
@@ -215,7 +217,7 @@ SongsViewModel@021ba2c6: [Lifecycle] - onUnsubscribe
 
 Loggers can be configured via `MviConfig`.
 
-### Progress Tracking
+## Progress Tracking
 
 The library provides a built-in `ProgressManager` to track loading states easily.
 
@@ -245,6 +247,89 @@ onActionFlow<Init> {
         }
 }
 ```
+
+## Testing
+
+The library provides a dedicated `test` module with helper functions for testing your MVI components. It's built on top of [Turbine](https://github.com/cashapp/turbine) and `kotlinx-coroutines-test`.
+
+### State testing
+
+Use `testState` to verify state transitions in your ViewModel or StateManager. It provides a `StateManagerFlowTurbine` which allows you to submit actions and await for state changes.
+
+```kotlin
+@Test
+fun `when initialized then fetched all songs`() = runTest {
+    mviComponent.testState(this) {
+        assertEquals(listOf(song1), expectMostRecentItem().songs)
+    }
+}
+
+@Test
+fun `when query changed then search songs`() = runTest {
+    mviComponent.testState(this) {
+        submitAction(SongsAction.SearchQueryChanged("Song 1"))
+        assertEquals(expectedSongs, expectMostRecentItem().songs)
+    }
+}
+```
+
+### Effects testing
+
+Use `testEffects` to verify that your component emits the expected effects.
+
+```kotlin
+@Test
+fun `when song clicked then open song details`() = runTest {
+    mviComponent.testEffects(this) {
+        submitAction(SongsAction.SongSelected(song))
+        assertEquals(SongsEffect.OpenSongDetails(song.id), awaitItem())
+    }
+}
+```
+
+### Simplified Test Cases
+
+The `test` module includes several higher-level test utilities for common scenarios.
+
+#### whenActionThenEffect
+
+A concise way to assert that a specific action triggers a specific effect.
+
+```kotlin
+@Test
+fun `when song clicked then open song details`() = runTest {
+    whenActionThenEffect(
+        stateComponent = mviComponent,
+        actionToSubmit = SongsAction.SongSelected(song),
+        expectedEffect = SongsEffect.OpenSongDetails(song.id),
+    )
+}
+```
+
+#### whenActionThenShowProgress
+
+Verifies that an action triggers a loading state that is automatically hidden when the operation completes. 
+It uses `TEST_DELAY` constant (2ms by default) to verify progress state. For this to work, ensure your repository mock/fake has a corresponding delay.
+
+```kotlin
+@Test
+fun `when searched then show and hide loading`() = runTest {
+    // repository mock should have a delay equal to TEST_DELAY
+    whenActionThenShowProgress(
+        stateComponent = viewModel,
+        actionToSubmit = SongsAction.SearchQueryChanged("Song 1"),
+        stateFieldToAssert = { it.isLoading }
+    )
+}
+```
+
+Other available helpers include:
+- `whenInitThenShowError`
+- `whenActionThenShowError`
+- `whenTextChangedThenUpdateState`
+- `testItemToggled`
+
+For more examples, check out [SongsDslViewModelTest.kt](sample/composeApp/src/commonTest/kotlin/com/adamczewski/kmpmvi/sample/screeens/dsl/list/SongsDslViewModelTest.kt).
 
 ## License
 

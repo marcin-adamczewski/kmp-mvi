@@ -23,8 +23,8 @@ public class EffectsHandler<T : MviEffect>(
     public val activeConsumers: SharedFlow<Int> = _activeConsumers.asSharedFlow()
 
     @PublishedApi
-    internal var activeSingleEffectConsumers: Set<KClass<out T>> =
-        AtomicMutableSet<KClass<out T>>()
+    internal val activeSingleEffectConsumers: AtomicMutableSet<KClass<out T>> =
+        AtomicMutableSet()
     public val observeEffects: Flow<T> = unconsumedEffectsFlow.map { it.effect }
 
     public suspend fun consume(
@@ -58,8 +58,8 @@ public class EffectsHandler<T : MviEffect>(
         noinline handler: suspend (B) -> Unit,
     ): Flow<B> {
         return unconsumedEffectsFlow
-            .onStart { activeSingleEffectConsumers += B::class }
-            .onCompletion { activeSingleEffectConsumers -= B::class }
+            .onStart { activeSingleEffectConsumers.add(B::class) }
+            .onCompletion { activeSingleEffectConsumers.remove(B::class) }
             .filter { it.effect is B }
             .map { uniqueEffect ->
                 val effect = uniqueEffect.effect as B

@@ -357,6 +357,42 @@ class MviContainerTest {
         }
 
     @Test
+    fun `Effects - given active single-effect consumer when emitting required-consumer effect of that type then effect delivered`() =
+        runTest {
+            val sut = createSut()
+            sut.effects.consumeEffectFlow<TestEffect.Refresh> { }
+                .test {
+                    sut.setEffect(requireConsumer = true) { TestEffect.Refresh }
+
+                    assertEquals(TestEffect.Refresh, awaitItem())
+                    expectNoEvents()
+                    cancel()
+                }
+        }
+
+    @Test
+    fun `Effects - given single-effect consumer completed then that type no longer counts as active`() =
+        runTest {
+            val sut = createSut()
+
+            // Subscribe and immediately cancel a single-effect consumer so onCompletion
+            // removes the type from activeSingleEffectConsumers.
+            sut.effects.consumeEffectFlow<TestEffect.Refresh> { }
+                .test { cancel() }
+            advanceUntilIdle()
+
+            // No active consumer for Refresh anymore, so a required-consumer effect is dropped
+            // at emit time and never reaches a later subscriber.
+            sut.setEffect(requireConsumer = true) { TestEffect.Refresh }
+
+            sut.effects.consumeFlow { }
+                .test {
+                    expectNoEvents()
+                    cancel()
+                }
+        }
+
+    @Test
     fun `Effects - given active consumer when emitting effects with required active consumer then effects emitted`() =
         runTest {
             val sut = createSut()

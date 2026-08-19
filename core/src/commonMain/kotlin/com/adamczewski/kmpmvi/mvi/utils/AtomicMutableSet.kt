@@ -6,6 +6,7 @@ import kotlin.concurrent.atomics.update
 /**
  * A multiplatform, thread-safe [MutableSet], implemented using AtomicFU.
  */
+@PublishedApi
 internal class AtomicMutableSet<V>(
     private val maxSize: Int = Int.MAX_VALUE
 ) : MutableSet<V> {

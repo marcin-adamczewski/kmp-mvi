@@ -30,6 +30,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import com.adamczewski.kmpmvi.mvi.error.ErrorManager
+import com.adamczewski.kmpmvi.mvi.model.MviMessage
 
 class MviDslTest {
 
@@ -121,6 +122,49 @@ class MviDslTest {
                 sut.submitAction(TestAction.UpdateValue("new value1"))
                 sut.submitAction(TestAction.UpdateValue("new value2"))
                 assertEquals("new value", awaitItem().value)
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `given state updated when state property read in action handler then reflects current state`() =
+        runTest {
+            val sut = mvi<TestAction, TestState, TestEffect>(TestState()) {
+                actions {
+                    onAction<TestAction.UpdateValue> { action ->
+                        setState { copy(value = action.value) }
+                        // Read the DSL `state` property (not the setEffect receiver) to verify it
+                        // reflects the freshly reduced value and not the initial snapshot.
+                        val currentValue = state.value
+                        setEffect { TestEffect.SomeEffect(currentValue) }
+                    }
+                }
+            }
+
+            sut.effects.observeEffects.test {
+                sut.submitAction(TestAction.UpdateValue("new value"))
+                assertEquals(TestEffect.SomeEffect("new value"), awaitItem())
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `given state updated when setMessage called in action handler then message reduced over current state`() =
+        runTest {
+            val sut = mvi<TestAction, TestState, TestEffect, TestMessage>(TestState()) {
+                actions {
+                    onAction<TestAction.UpdateValue> { action ->
+                        setState { copy(value = action.value) }
+                        // setMessage passes the current state as the reducer receiver, so `value`
+                        // here must reflect the freshly reduced value, not the initial snapshot.
+                        setMessage { TestMessage.ValueMessage(value) }
+                    }
+                }
+            }
+
+            sut.messages.test {
+                sut.submitAction(TestAction.UpdateValue("new value"))
+                assertEquals(TestMessage.ValueMessage("new value"), awaitItem())
                 expectNoEvents()
             }
         }
@@ -285,5 +329,8 @@ class MviDslTest {
     }
     private sealed interface TestEffect : MviEffect {
         data class SomeEffect(val data: String) : TestEffect
+    }
+    private sealed interface TestMessage : MviMessage {
+        data class ValueMessage(val value: String) : TestMessage
     }
 }

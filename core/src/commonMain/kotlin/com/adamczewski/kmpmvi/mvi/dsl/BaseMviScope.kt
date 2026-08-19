@@ -18,7 +18,7 @@ open public class BaseMviScope<Action : MviAction, State : MviState, Effect : Mv
 
     public val progress: ProgressManager = container.progress
 
-    public val state: State = container.observableState.value
+    public val state: State get() = container.observableState.value
 
     public val observableState: StateFlow<State> = container.observableState
 

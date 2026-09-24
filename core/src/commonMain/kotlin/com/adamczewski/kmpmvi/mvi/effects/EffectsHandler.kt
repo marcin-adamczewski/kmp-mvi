@@ -25,6 +25,12 @@ public class EffectsHandler<T : MviEffect>(
     @PublishedApi
     internal val activeSingleEffectConsumers: AtomicMutableSet<KClass<out T>> =
         AtomicMutableSet()
+
+    // Ids of effects a consumer has started handling. Claimed before running the handler so
+    // that when several consumers are active only one runs the handler for a given one-time
+    // effect. A claim is kept on success and reverted on failure (see handleAndConsumeEffect).
+    private val handledEffectIds = AtomicMutableSet<String>(maxSize = HANDLED_IDS_LRU_CACHE_SIZE)
+
     public val observeEffects: Flow<T> = unconsumedEffectsFlow.map { it.effect }
 
     public suspend fun consume(
@@ -91,11 +97,22 @@ public class EffectsHandler<T : MviEffect>(
         handler: suspend (B) -> Unit,
         shouldConsume: Boolean = true,
     ): B {
-        handler(effect)
-        withContext(NonCancellable) {
-            if (shouldConsume) {
-                consume(uniqueEffect)
+        if (shouldConsume && !handledEffectIds.add(uniqueEffect.id)) {
+            return effect
+        }
+        try {
+            handler(effect)
+            withContext(NonCancellable) {
+                if (shouldConsume) {
+                    consume(uniqueEffect)
+                }
             }
+        } catch (throwable: Throwable) {
+            // The handler didn't complete, so drop the claim to allow redelivery.
+            if (shouldConsume) {
+                handledEffectIds.remove(uniqueEffect.id)
+            }
+            throw throwable
         }
 
         return effect
@@ -103,5 +120,9 @@ public class EffectsHandler<T : MviEffect>(
 
     internal fun isEffectConsumerActive(effect: MviEffect): Boolean {
         return _activeConsumers.value > 0 || activeSingleEffectConsumers.contains(effect::class)
+    }
+
+    private companion object {
+        private const val HANDLED_IDS_LRU_CACHE_SIZE = 30
     }
 }

@@ -20,7 +20,10 @@ class EffectsHandlerTest {
     private fun createSut(
         consumer: EffectConsumer = EffectConsumer()
     ): EffectsHandler<TestEffect> {
-        return EffectsHandler(effectsFlow, consumer::consume)
+        return EffectsHandler(
+            unconsumedEffectsFlow = effectsFlow,
+            consume = consumer::consume
+        )
     }
 
     @Test
@@ -89,6 +92,27 @@ class EffectsHandlerTest {
                 assertEquals(consumer.consumedEffects[0].effect, TestEffect.ChildBaseEffect)
                 cancelAndConsumeRemainingEvents()
             }
+    }
+
+    @Test
+    fun `given two active consumers when effect emitted then only one runs the handler`() = runTest {
+        val consumer = EffectConsumer()
+        val sut = createSut(consumer)
+        var handledCount = 0
+        val handler: suspend (TestEffect) -> Unit = { handledCount++ }
+
+        val jobA = launch { sut.consumeFlow(handler = handler).collect {} }
+        val jobB = launch { sut.consumeFlow(handler = handler).collect {} }
+        advanceUntilIdle()
+
+        effectsFlow.emit(UniqueEffect(TestEffect.Navigate("once")))
+        advanceUntilIdle()
+
+        assertEquals(1, handledCount)
+        assertEquals(1, consumer.consumedEffects.size)
+
+        jobA.cancel()
+        jobB.cancel()
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.adamczewski.kmpmvi.mvi.actions
 
 import com.adamczewski.kmpmvi.mvi.model.MviAction
+import com.adamczewski.kmpmvi.mvi.utils.AtomicMutableSet
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitAll
@@ -21,15 +22,17 @@ public class ActionsManager<Action : MviAction>(
     private val actionsLock: CompletableDeferred<Unit>,
 ) {
     @PublishedApi
-    internal val collectedActions: MutableList<CompletableDeferred<Unit>> =
-        mutableListOf<CompletableDeferred<Unit>>()
+    internal val collectedActions: AtomicMutableSet<CompletableDeferred<Unit>> =
+        AtomicMutableSet()
     @PublishedApi
     internal val actions: MutableSharedFlow<Action> =
         MutableSharedFlow<Action>(extraBufferCapacity = 5)
 
     public fun submitAction(action: Action) {
         scope.launch {
+            // wait until handleActions{} finished registering all handlers
             actionsLock.await()
+            // wait until every registered handler is actually subscribed
             collectedActions.awaitAll()
             actions.emit(action)
         }

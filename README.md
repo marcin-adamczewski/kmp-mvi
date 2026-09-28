@@ -331,6 +331,23 @@ Other available helpers include:
 
 For more examples, check out [SongsDslViewModelTest.kt](sample/composeApp/src/commonTest/kotlin/com/adamczewski/kmpmvi/sample/screeens/dsl/list/SongsDslViewModelTest.kt).
 
+
+## Main dispatcher on JVM / Desktop
+
+Each component by default runs on `Dispatchers.Main` when it's available (Android, iOS). The plain JVM has no
+`Dispatchers.Main` unless you add a UI dispatcher artifact, so for Compose/Swing desktop apps add
+`kotlinx-coroutines-swing` to your desktop source set to dispatch state and effects on the UI thread:
+
+```kotlin
+kotlin {
+    sourceSets {
+        jvmMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:[coroutinesVersion]")
+        }
+    }
+}
+```
+
 ## License
 
 ```

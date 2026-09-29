@@ -11,7 +11,11 @@ public class EffectsManager<T : MviEffect>(
     bufferSize: Int,
     idsLruCacheSize: Int = EFFECT_IDS_LRU_CACHE_SIZE
 ) {
-    private val consumedEffectIds = AtomicMutableSet<String>(maxSize = idsLruCacheSize)
+    // The effect-id caches must be at least as large as the replay buffer. Otherwise a consumed
+    // effect's id could be evicted while the effect is still in the replay buffer, so it would
+    // pass the "unconsumed" filter and be delivered (and handled) again on the next subscription.
+    private val effectIdsCacheSize = maxOf(idsLruCacheSize, bufferSize)
+    private val consumedEffectIds = AtomicMutableSet<String>(maxSize = effectIdsCacheSize)
     private val effectsFlow = MutableSharedFlow<UniqueEffect<T>>(
         replay = bufferSize,
         extraBufferCapacity = bufferSize
@@ -23,7 +27,8 @@ public class EffectsManager<T : MviEffect>(
 
     public val effectsHandler: EffectsHandler<T> = EffectsHandler(
         unconsumedEffectsFlow = unconsumedEffects,
-        consume = { effect -> consumeEffect(effect) }
+        consume = { effect -> consumeEffect(effect) },
+        handledIdsCacheSize = effectIdsCacheSize
     )
 
     public suspend fun setEffect(effect: T, requireConsumer: Boolean = false) {

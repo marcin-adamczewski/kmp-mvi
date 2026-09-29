@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 public class EffectsHandler<T : MviEffect>(
     @PublishedApi internal val unconsumedEffectsFlow: Flow<UniqueEffect<T>>,
     @PublishedApi internal val consume: suspend (UniqueEffect<T>) -> Unit,
+    handledIdsCacheSize: Int = HANDLED_IDS_LRU_CACHE_SIZE,
 ) {
     private var _activeConsumers = MutableStateFlow(0)
     public val activeConsumers: SharedFlow<Int> = _activeConsumers.asSharedFlow()
@@ -29,7 +30,9 @@ public class EffectsHandler<T : MviEffect>(
     // Ids of effects a consumer has started handling. Claimed before running the handler so
     // that when several consumers are active only one runs the handler for a given one-time
     // effect. A claim is kept on success and reverted on failure (see handleAndConsumeEffect).
-    private val handledEffectIds = AtomicMutableSet<String>(maxSize = HANDLED_IDS_LRU_CACHE_SIZE)
+    // Sized like the consumed-id cache (at least the replay buffer) so a claim isn't evicted
+    // while consumers may still be processing that effect from the buffer.
+    private val handledEffectIds = AtomicMutableSet<String>(maxSize = handledIdsCacheSize)
 
     public val observeEffects: Flow<T> = unconsumedEffectsFlow.map { it.effect }
 

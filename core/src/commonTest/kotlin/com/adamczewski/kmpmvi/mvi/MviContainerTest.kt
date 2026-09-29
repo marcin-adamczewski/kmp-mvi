@@ -326,6 +326,31 @@ class MviContainerTest {
         }
 
     @Test
+    fun `Effects - given buffer larger than default id cache when effects consumed then they are not redelivered to a new subscriber`() =
+        runTest {
+            // Buffer larger than the default id-cache size (30); emit fewer than the buffer so all
+            // effects stay replayable but more than 30 so the old fixed-size cache would evict the
+            // earliest consumed ids.
+            val sut = createSut(effectsBufferSize = 40)
+            val count = 35
+
+            sut.effects.consumeFlow(handler = {})
+                .test {
+                    repeat(count) { i -> sut.setEffect { TestEffect.Navigate("route$i") } }
+                    repeat(count) { awaitItem() }
+                    cancelAndIgnoreRemainingEvents()
+                }
+
+            // All effects were consumed, so a new subscriber must not receive any again - not even
+            // the earliest ones, which a cache smaller than the buffer would have evicted.
+            sut.effects.consumeFlow(handler = {})
+                .test {
+                    expectNoEvents()
+                    cancel()
+                }
+        }
+
+    @Test
     fun `Effects - given no active consumer when emitting effects with required active consumer then do not emit effects when consumer available`() =
         runTest {
             val sut = createSut()

@@ -53,7 +53,7 @@ class AtomicMutableSetTest {
     }
 
     @Test
-    fun `given element not present when added then returns true, when added again returns false`() =
+    fun `given element not present when added then returns true when added again returns false`() =
         runTest {
             val sut = AtomicMutableSet<Int>()
 
@@ -62,7 +62,7 @@ class AtomicMutableSetTest {
         }
 
     @Test
-    fun `given element present when removed then returns true, when removed again returns false`() =
+    fun `given element present when removed then returns true when removed again returns false`() =
         runTest {
             val sut = AtomicMutableSet<Int>()
             sut.add(1)

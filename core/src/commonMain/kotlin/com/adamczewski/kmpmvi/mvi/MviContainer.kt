@@ -24,7 +24,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -167,9 +168,11 @@ public class BaseMviContainer<Action : MviAction, State : MviState, Effects : Mv
 
         scope.launch {
             observableState
-                .filter { it !== initialState }
-                .collect {
-                    logger.onState(it)
+                .withIndex()
+                // Skip the initial state, already logged in onInitialState()
+                .filterNot { (index, state) -> index == 0 && state === initialState }
+                .collect { (_, state) ->
+                    logger.onState(state)
                 }
         }
 

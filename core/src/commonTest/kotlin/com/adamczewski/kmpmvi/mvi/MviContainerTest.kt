@@ -2,6 +2,7 @@ package com.adamczewski.kmpmvi.mvi
 
 import app.cash.turbine.test
 import com.adamczewski.kmpmvi.mvi.actions.ActionNotSubscribedException
+import com.adamczewski.kmpmvi.mvi.logger.BaseMviLogger
 import com.adamczewski.kmpmvi.mvi.logger.DefaultMviLogger
 import com.adamczewski.kmpmvi.mvi.model.MviAction
 import com.adamczewski.kmpmvi.mvi.model.MviEffect
@@ -1220,6 +1221,42 @@ class MviContainerTest {
 
         assertFalse(sut.scope.isActive)
     }
+
+    @Test
+    fun `Logger - given object state when state returns to the initial state then it is logged`() =
+        runTest {
+            Dispatchers.setMain(UnconfinedTestDispatcher())
+            val loggedStates = mutableListOf<MviState>()
+            val recordingLogger = object : BaseMviLogger() {
+                override fun onState(state: MviState) {
+                    loggedStates.add(state)
+                }
+            }
+            val sut = MviContainer<TestAction, SealedTestState, TestEffect>(
+                scopeProvider = scopeProvider,
+                initialState = SealedTestState.Loading,
+                settings = MviSettings(
+                    isLoggerEnabled = true,
+                    logger = { recordingLogger },
+                    effectsBufferSize = 10,
+                    exceptionHandler = null,
+                    scopeProvider = scopeProvider
+                )
+            )
+            // Let the state logger subscribe; its first (replayed) emission is the initial state
+            // and must not be logged as a transition.
+            advanceUntilIdle()
+
+            sut.setState { SealedTestState.Data(id = "x") }
+            sut.setState { SealedTestState.Loading }
+            advanceUntilIdle()
+
+            // The return to Loading (the same object as the initial state) is still logged.
+            assertEquals(
+                listOf<MviState>(SealedTestState.Data(id = "x"), SealedTestState.Loading),
+                loggedStates
+            )
+        }
 
     private sealed interface TestEffect : MviEffect {
         data class Navigate(val route: String) : TestEffect

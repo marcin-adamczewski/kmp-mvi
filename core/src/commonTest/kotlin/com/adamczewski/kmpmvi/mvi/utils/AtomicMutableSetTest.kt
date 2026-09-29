@@ -12,14 +12,14 @@ class AtomicMutableSetTest {
     fun `given empty set when adding all elements then set contains all elements`() = runTest {
         val sut = AtomicMutableSet<Int>()
         sut.addAll(listOf(1, 2))
-        assertEquals(mutableSetOf(1, 2), sut)
+        assertEquals(setOf(1, 2), sut.toSet())
     }
 
     @Test
     fun `given empty set when adding an element then set contains this element`() = runTest {
         val sut = AtomicMutableSet<Int>()
         sut.add(1)
-        assertEquals(mutableSetOf(1), sut)
+        assertEquals(setOf(1), sut.toSet())
     }
 
     @Test
@@ -29,7 +29,7 @@ class AtomicMutableSetTest {
 
         sut.removeAll(listOf(1, 2))
 
-        assertEquals(mutableSetOf(3), sut)
+        assertEquals(setOf(3), sut.toSet())
     }
 
     @Test
@@ -39,7 +39,7 @@ class AtomicMutableSetTest {
 
         sut.remove(2)
 
-        assertEquals(mutableSetOf(1, 3), sut)
+        assertEquals(setOf(1, 3), sut.toSet())
     }
 
     @Test
@@ -49,8 +49,27 @@ class AtomicMutableSetTest {
 
         sut.clear()
 
-        assertEquals(mutableSetOf(), sut)
+        assertEquals(emptySet(), sut.toSet())
     }
+
+    @Test
+    fun `given element not present when added then returns true, when added again returns false`() =
+        runTest {
+            val sut = AtomicMutableSet<Int>()
+
+            assertTrue(sut.add(1))
+            assertFalse(sut.add(1))
+        }
+
+    @Test
+    fun `given element present when removed then returns true, when removed again returns false`() =
+        runTest {
+            val sut = AtomicMutableSet<Int>()
+            sut.add(1)
+
+            assertTrue(sut.remove(1))
+            assertFalse(sut.remove(1))
+        }
 
     @Test
     fun `given non-empty set when contains called for existing element then return true`() = runTest {
@@ -79,7 +98,7 @@ class AtomicMutableSetTest {
         val sut = AtomicMutableSet<Int>(maxSize = 2).apply {
             addAll(listOf(1, 2, 3, 4, 5))
         }
-        assertEquals(mutableSetOf(4, 5), sut)
+        assertEquals(setOf(4, 5), sut.toSet())
     }
 
     @Test
@@ -91,7 +110,7 @@ class AtomicMutableSetTest {
             add(4)
             add(5)
         }
-        assertEquals(mutableSetOf(4, 5), sut)
+        assertEquals(setOf(4, 5), sut.toSet())
     }
 
     @Test

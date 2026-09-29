@@ -33,7 +33,7 @@ public class ActionsManager<Action : MviAction>(
             // wait until handleActions{} finished registering all handlers
             actionsLock.await()
             // wait until every registered handler is actually subscribed
-            collectedActions.awaitAll()
+            collectedActions.toSet().awaitAll()
             actions.emit(action)
         }
     }

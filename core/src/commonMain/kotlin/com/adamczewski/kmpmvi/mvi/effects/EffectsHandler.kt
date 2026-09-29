@@ -23,8 +23,11 @@ public class EffectsHandler<T : MviEffect>(
     private var _activeConsumers = MutableStateFlow(0)
     public val activeConsumers: SharedFlow<Int> = _activeConsumers.asSharedFlow()
 
+    // Effect classes that currently have a single-effect consumer (consumeEffectFlow<B>) active.
+    // Typed as KClass<*> so the membership check in isEffectConsumerActive can look up an effect's
+    // class (KClass<out MviEffect>) without an unchecked cast.
     @PublishedApi
-    internal val activeSingleEffectConsumers: AtomicMutableSet<KClass<out T>> =
+    internal val activeSingleEffectConsumers: AtomicMutableSet<KClass<*>> =
         AtomicMutableSet()
 
     // Ids of effects a consumer has started handling. Claimed before running the handler so
